@@ -24,6 +24,9 @@
 # RStudio files
 .Rproj.user/
 
+# Rmd temporary files
+vignettes/*.log
+
 # produced vignettes
 vignettes/*.html
 vignettes/*.pdf
