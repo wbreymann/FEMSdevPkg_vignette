@@ -1,0 +1,368 @@
+---
+title: "The FEMSdevPkg"
+output: 
+  rmarkdown::pdf_document:
+    toc: true
+    toc_depth: 2
+
+vignette: >
+  %\VignetteIndexEntry{FEMSdevPkg}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+author: "Henriette Elise Breymann and others"
+date: "`r Sys.Date()`"
+---
+
+\newpage
+
+
+# Introduction
+
+## The digital financial world
+
+Today's financial system is digital and banks can rightly be considered as 
+applied IT companys. Our money, our investments and debts are just zillions of 
+numbers in
+huge data bases. From this persective the banking business can be
+considered of a transformation of these numbers according to appropriate rules.
+And these transformations must be highly automated; otherwise banks could not function. 
+
+Unfortunately, the automation does not work totally automated across the boards. 
+Sure, the parts that are vital for banks to subsist do work automatically. 
+This mainly concerns financial transactions.
+But there are other parts that, even though equally important for controlling 
+and steering the institutions, are
+not as vital for the daily business and thus less integrated. 
+Which generates
+large costs for financial institutions and limits the impact of what could be 
+achieved with optimal automation.
+
+The technical reason is the fragmented IT landscape which itself is a result of 
+the way this
+landscape grew over the years, piece by piece. Each piece --- or subsystem ---
+works well for itself but they are not optimally working together. The problem is
+the interfaces and, closely related to this, the data standards. And these two very
+technical aspects are closely related to the task that they should support, namely
+banking. Which means that optimal interfaces and data standards that are up to the
+task cannot be constructed without a thorough understanding of banking. An here is
+the rub: IT and banking expertise are rarely found together in a single person.
+Bankers care little about the underlying IT and IT specialists usually are not very 
+literate in banking. Moreover, different lines of business large work independent
+from one another. Which leads to silo-type structures: integration well advanced
+within a silo but pur across silos. Which means that integration across silos
+still requires a lot of manual work. As a consequence, regulatory reporting, which 
+requires presicely this integration, is slow and costly. And the cost-income ratio
+of banks is around 60\% or higher. 
+
+```{=latex}
+\begin{figure}[h] 
+  \begin{center}
+  \includegraphics[width = 15cm]{./figures/bowtie.pdf}
+  \end{center}
+  \caption{Bowtie structure of the financial system with the ACTUS contract types
+  at its center.}
+  \label{fig:Bowtie}
+\end{figure}
+```
+
+
+To overcome these shortcoming, 
+a special infrastructural layer has been developed. 
+The layer we're refering to is the ACTUS 
+standard for digital financial contract representation. ACTUS stands for 
+Algorithmic Contract Type Unified Standard. It consists of two part, namely
+
+- the ACTUS Data Dictionary (ADD) and
+
+- the ACTUS Cashflow Generation Algorithm (ACGA).
+
+The first standardizes the data involved in a financial contract and the second
+standardizes the definition of financial contracts, i.e., the rules that define 
+who cashflows are exchanged by the involved parties.
+
+
+
+
+## Most elementary building blocks: financial contracts
+
+The standard for both parts is defined in a way that it incorporates essential
+parts of the basic banking knowledge, by this supporting automation across the
+board in a particular way. The reason ACTUS is focussing on financial contracts 
+is that such contracts are the basic building blocs of all financial business
+and thus the technical lynchpin of the financial system.
+
+The most basic action in all financial activity is the individual single cashflow.
+As, e.g., if you put money on your current account or withdraw money from it.
+Usually, however, cashflows do not occur individually but are tied together by
+some rules. As, e.g., in the case of a bond or a mortgage. And these rules define
+the financial contract. There central role is illustrated by figure\ldots.
+
+
+## Aim of the FEMSdevPkg package
+
+that has the power to 
+overcome this difficulty and provides the means to become aquainted with this
+layer and use it in a simple way. 
+
+
+The \verb+FEMSdevPkg+ is an R package that give users the possibility to try out
+the modeling of single financial contracts, portfolios of contracts or whole 
+institution on a demo level. The package uses the ACTUS contract standard and 
+cash flow generating algorithms that are transparent, efficient and meant to be
+usable for even large scale institutions. The aim of this package, however. is
+to give users an introduction an easy access to this technology at a demonstration 
+level. For production level systems the interest users should look for software
+solution based on the ACTUS technology.\footnote{%
+On exsample is the product suite of the Ariadne Business Analytics AG.}
+
+\newpage
+
+# Setup
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+library(pandoc)
+```
+
+```{r setup, warning = FALSE}
+library(FEMSdevPkg)
+```
+For the calculations, a server from [ACTUS Financial Research Foundation](www.actusfrf.com) hosted by ZHAW is used.
+Here we define the serverURL required for all calculations.
+```{r}
+serverURL <- "https://dadfir3-app.zhaw.ch/"
+```
+Now we are all set to start creating contracts.
+
+# Single Contracts
+## Fixed Rate Contracts
+Let's start with a simple PAM (Principal at Maturity) contract.
+```{r}
+pam1 <- bondvr("2013-12-31", maturity = "5 years", nominal = 1000,
+               coupon = 0.02, paymentFreq = "1 year", role = "long",
+               rateResetFreq = "Fixed rate")
+```
+
+We can have a look at the contract terms.
+```{r}
+unlist(pam1$contractTerms)
+```
+
+With the function `generateEventSeries()` we can generate all events of the contract.
+The functions takes the following arguments:
+- `contract`: The contract object
+- `riskFactors``: A list of risk factors (can also be empty)
+- `serverURL`: The URL of the server to be used for the calculations
+
+```{r}
+evs1 <- generateEventSeries(pam1, list(), serverURL)
+unlist(list(contractID = evs1$contractID,
+            contractType=evs1$contractType,
+            statusDate= evs1$statusDate,
+            riskFactors = evs1$riskFactors
+))
+evs1$events_df
+```
+
+The events can be plotted afterwards by calling the function `cashflowPlot()`.
+```{r}
+cashflowPlot(evs1)
+```
+
+## Variable Rate Contracts
+Contracts can also have variable interest rates. Herefore, we need to initialize some interest rate risk factors first.
+
+First of all, let's load the sample data from the package.
+Suggestion: We could make it available inside the package and load it from there.
+```{r}
+mydatadir <- "./mydata"
+installSampleData(mydatadir)
+```
+
+Now we can load the sample data.
+```{r}
+falling_fp <- paste0(mydatadir,"/UST5Y_fallingRates.csv")
+rising_fp <-  paste0(mydatadir,"/UST5Y_risingRates.csv")
+rfx_falling <- sampleReferenceIndex(falling_fp,"UST5Y_fallingRates", 
+                                    "YC_EA_AAA",100)
+rfx_rising <- sampleReferenceIndex(rising_fp,"UST5Y_risingRates",
+                                   "YC_EA_AAA",100)
+```
+
+After that we can create a contract with variable rates and generate the events and outputs as before.
+```{r}
+pam2 <- bondvr("2020-12-31", maturity = "5 years", nominal = 50000,
+               coupon = 0.02, paymentFreq = "3 months", role = "long",
+               rateResetFreq = "1 years", rateResetSpread = 0.01 )
+unlist(pam2$contractTerms)
+evs2 <- generateEventSeries(pam2, list(rfx_falling), serverURL)
+evs2$events_df
+```
+And also the cashflow plot.
+**Need to figure out a way to adjust the size of the plot, not good yet!!**
+```{r, width = 12, height = 8}
+cashflowPlot(evs2)
+```
+
+
+## Including raw Latex
+
+Here we have a simple exmaple of a small table written in Latex
+
+```{=latex}
+\begin{tabular}{ll}
+A & B \\
+A & B \\
+\end{tabular}
+```
+
+
+## Examples from Henriettes FEMS documentation:
+Start with an Example picture to see whether referencing to figures works (picture replaced with EXAMPLE).
+
+```{=latex}
+\begin{figure}[h] 
+  \begin{center}
+  \includegraphics[width = 4cm]{./figures/example.jpg}
+  \end{center}
+  \caption{Structure of balance sheet and profit and loss statement of a very simple model bank.}
+  \label{fig:BankBBsimple}
+\end{figure}
+```
+
+Text which is formatted in latex has to wrapped in a block with the {=latex} command:
+References etc. do not need to be changed 
+
+```{=latex}
+The second important part of the accounting information is the P\&L statement shown in the lower part of 
+Fig.~\ref{fig:BankBBsimple}. It reports all the revenues and expenses during the reporting period 
+(typically a year or a quarter). For our model bank we have two types of revenues and two types of expenses:
+\begin{itemize}
+  \item 
+  Expenses:
+  \begin{itemize}
+    \item 
+    Generated out of the balance sheet:\\ 
+    Interest payments and expenses due to change of the valuation.
+    \item
+    Expenses for running the business:\\
+    Wages, rents, IT
+  \end{itemize}
+  \item
+  Revenues:
+  \begin{itemize}
+    \item 
+    Generated out of the balance sheet:\\
+    Interest income and capital gains.
+    \item
+    Additional revenues from running the business, mainly fees for services.
+  \end{itemize}
+\end{itemize}
+In the following we will concentrate on modeling the balance sheet and the expenses and revenues generated
+out of the balance sheet in quite some details, while the additional expenses and revenues are taken into 
+account summarily.
+```
+
+
+## Example for a formula:
+Here we see an example for a formula which even uses R values within.
+If we include R values in markdown we have to change the /Sexpr{} from latex (sweave) with the expression: 'r inline_code_here'
+
+```{r ir, echo =FALSE}
+#Value which is used in formula notation has to be defined in r environment
+ir = 0.04
+```
+
+```{=latex}
+Determining a contract's value is refered to as valuation. 
+The value of a contract is in general not simply given, it requires computations.  
+The type of computation is refered to as valuation method. 
+In accounting there are different valuation methods. 
+In this course, we will only use two of them, namely \emph{Nominal Value} and \emph{Marking to Model}.
+\begin{description}
+  \item[Nominal value]
+  The value of the contract is set to its nominal value. 
+  This is the simplest valuation method which only requires extracting this value from the 
+  contract data.
+  \item[Marking to Model]
+  The value of the contract is determined by means of a mathematical model. 
+  In the case of a bond or a loan, the value is determined by its net present value computed 
+  through discounting. In cases without default risk, as is the case e.g. for Swiss government bonds, 
+  the risk-free interest rate is used for discounting. 
+  If the market interest rate (for all terms, to keep it simple) is 3\%, the bond's net present
+  value is
+  \begin{equation}
+  \label{eq:NPV_bond}
+    \text{NPV } = \sum_{i=1}^{5} \frac{40}{`r 1+ir`^i} + \frac{1000}{`r 1+ir`^5} = 
+    `r round(sum(rep(40,5)/(1+ir)^(1:5)) + 1000/(1+ir)^5,2)`
+  \end{equation}
+\end{description}
+In the simulation environment, valuation is done with the command \texttt{value(object, type, method)}.
+```
+
+## Including a figure with Latex (Picture replaced with EXAMPLE picture):
+
+```{=latex}
+\begin{figure}[h] 
+  \begin{center}
+  \includegraphics[width=10cm]{./figures/example.jpg}
+  \end{center}
+  \caption{Time dependent net present value of the example bond for different market interest rates. 
+  Full black line: 4\%; dashed red line: Stress scenario 1, 3\%; 
+  dashed green line: Stress scenario 2, 5\%.}
+  \label{fig:NPV_bond}
+\end{figure}
+```
+
+
+Example for a pagebreak:
+\pagebreak
+
+```{=latex}
+This is how to cross-reference: Cf. fig. \ref{fig:NPV_bond}.
+```
+
+## Including a table with R values
+First we have an  example for a simple table in latex. No changes to the latex 
+code are needed. Afterwards we see another formula. Again the format of the 
+inline r code had to be changed to 'r inline_code_here'
+```{r values for tabular block, echo = FALSE}
+#Values which are used in formula notation have to be defined in r environment
+val <- 1000
+val.lo <- 800
+val.hi <- 1200
+```
+
+
+```{=latex}
+There is a theory to compute this value, which is closely related to a quantity called 
+the \emph{duration} of a bond. 
+Here, we will neither introduce these notions nor do the theoretical computation. 
+This is part of the module \emph{Mathematik der Finanzmärkte 1}. 
+Instead, we will carry out an approximate numerical computation of this quantity using the bond value 
+obtained for the different values of the market interest rate.
+
+The values obtained from the simulation were:
+\begin{center}
+  \begin{tabular}{c|ccc}
+  Interest rate & 3\% & 4\% & 5\% \\\hline
+  Value & `r val.hi` &`r val` & `r val.lo`
+  \\
+  \end{tabular}
+\end{center}
+The bond's sensitivity is thus approximately given as 
+\[
+  \frac{1}{`r val`}\cdot \frac{`r val.hi`- `r val`}{0.01} = `r (val.hi-val)/(0.01*val)`
+\]
+This value is pretty close to the bonds term to maturity, which is 5 years. This is not accidental. 
+Indeed, a bonds sensitivity is the negative value of it's duration, and the duration is closely tied 
+to the bond's term to maturity.\footnote{Both quatities are equal for a zero-coupon bond. 
+For a coupon-bearing the duration is strictly smaller than the term to maturity, 
+and the difference is larger the larger the market interest rate.}
+
+```
+
+
+
