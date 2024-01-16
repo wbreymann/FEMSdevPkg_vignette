@@ -54,17 +54,6 @@ still requires a lot of manual work. As a consequence, regulatory reporting, whi
 requires presicely this integration, is slow and costly. And the cost-income ratio
 of banks is around 60\% or higher. 
 
-```{=latex}
-\begin{figure}[h] 
-  \begin{center}
-  \includegraphics[width = 15cm]{./figures/bowtie.pdf}
-  \end{center}
-  \caption{Bowtie structure of the financial system with the ACTUS contract types
-  at its center.}
-  \label{fig:Bowtie}
-\end{figure}
-```
-
 
 To overcome these shortcoming, 
 a special infrastructural layer has been developed. 
@@ -86,19 +75,61 @@ who cashflows are exchanged by the involved parties.
 ## Most elementary building blocks: financial contracts
 
 The standard for both parts is defined in a way that it incorporates essential
-parts of the basic banking knowledge, by this supporting automation across the
+parts of the basic banking knowledge, and by this supporting automation across the
 board in a particular way. The reason ACTUS is focussing on financial contracts 
 is that such contracts are the basic building blocs of all financial business
-and thus the technical lynchpin of the financial system.
-
-The most basic action in all financial activity is the individual single cashflow.
+and thus the technical lynchpin of the financial system. Indeed, the most basic 
+action in all financial activity is the individual single cashflow.
 As, e.g., if you put money on your current account or withdraw money from it.
 Usually, however, cashflows do not occur individually but are tied together by
 some rules. As, e.g., in the case of a bond or a mortgage. And these rules define
-the financial contract. There central role is illustrated by figure\ldots.
+the financial contract. 
 
+```{=latex}
+\begin{figure}[h] 
+  \begin{center}
+  \includegraphics[width = 15cm]{./figures/bowtie.pdf}
+  \end{center}
+  \caption{Bowtie structure of the financial system with the ACTUS contract types
+  at its center.}
+  \label{fig:Bowtie}
+\end{figure}
+```
+
+Financial contracts have a central role in the structure
+of the financial system. This is illustrated in figure \ref{fig:Bowtie}. This 
+structure is often found in complex systems showing up in nature and society. 
+An example outside the world of finance is the metabolism. 
+It contains very diverse inputs (left) and outputs (right) but a highly standardized
+and efficient core in the center. 
+
+
+
+[THIS HAS TO BE ELABORATED ON SOMEWHAT MORE.]
+
+\clearpage
+
+## The logic of ACTUS
+
+The logic of the processing of ACTUS contracts is shown in figure \ref{fig:ACTUS-logic}.
+
+```{=latex}
+\begin{figure}[h] 
+  \begin{center}
+  \includegraphics[width = 15cm]{./figures/ACTUS_logic.pdf}
+  \end{center}
+  \caption{The processing logic of ACTUS contracts.}
+  \label{fig:ACTUS-logic}
+\end{figure}
+```
+
+
+\clearpage
 
 ## Aim of the FEMSdevPkg package
+
+Notice that ACTUS is an infrastructural element that cannot be used in isolation
+but needs an environment to make use of it.
 
 that has the power to 
 overcome this difficulty and provides the means to become aquainted with this
