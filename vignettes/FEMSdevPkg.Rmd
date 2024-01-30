@@ -106,7 +106,7 @@ there are only
 about 100 (stable) atoms, there are millions of different molecules, from simple ones
 as $\text{H}_2\text{O}$ to very complicated, ones such as e.g. alkane chains, 
 that may consist of thousands of atoms. All these molecules serve different purposes.
-Similarly, there are myriads of (often bespoce) financial contracts, 
+Similarly, there are myriads of (often bespoke) financial contracts, 
 which also serve different, partly very special purposes. 
 Examples are structured products, exotic derivatives bonds and over-the-counter 
 contracts.
