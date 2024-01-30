@@ -23,11 +23,11 @@ date: "`r Sys.Date()`"
 Today's financial system is digital and banks can rightly be considered as 
 applied IT companys. Our money, our investments and debts are just zillions of 
 numbers in
-huge data bases. From this persective the banking business can be
-considered of a transformation of these numbers according to appropriate rules.
+huge data bases. From this persective the banking business can formally be
+considered of a transformation of these numbers according to specific rules.
 And these transformations must be highly automated; otherwise banks could not function. 
 
-Unfortunately, the automation does not work totally automated across the boards. 
+Unfortunately, the treatment of these numbers is not totally automated across the boards. 
 Sure, the parts that are vital for banks to subsist do work automatically. 
 This mainly concerns financial transactions.
 But there are other parts that, even though equally important for controlling 
@@ -36,6 +36,17 @@ not as vital for the daily business and thus less integrated.
 Which generates
 large costs for financial institutions and limits the impact of what could be 
 achieved with optimal automation.
+It also limits the possible impact of regulation.
+
+```{=latex}
+\begin{figure}[h] 
+  \begin{center}
+  \includegraphics[width = 15cm]{./figures/Rabobank_IT.jpg}
+  \end{center}
+  \caption{Model of the IT landscape of the Rabobank. (from linked-in)}
+  \label{fig:Rabo-IT}
+\end{figure}
+```
 
 The technical reason is the fragmented IT landscape which itself is a result of 
 the way this
@@ -43,22 +54,133 @@ landscape grew over the years, piece by piece. Each piece --- or subsystem ---
 works well for itself but they are not optimally working together. The problem is
 the interfaces and, closely related to this, the data standards. And these two very
 technical aspects are closely related to the task that they should support, namely
-banking. Which means that optimal interfaces and data standards that are up to the
-task cannot be constructed without a thorough understanding of banking. An here is
+different aspects of banking. 
+Which means that optimal interfaces and data standards that are up to the
+task cannot be constructed without a thorough understanding of banking and finance. 
+And here is
 the rub: IT and banking expertise are rarely found together in a single person.
-Bankers care little about the underlying IT and IT specialists usually are not very 
-literate in banking. Moreover, different lines of business large work independent
-from one another. Which leads to silo-type structures: integration well advanced
-within a silo but pur across silos. Which means that integration across silos
-still requires a lot of manual work. As a consequence, regulatory reporting, which 
-requires presicely this integration, is slow and costly. And the cost-income ratio
+Bankers care little about the underlying IT, and IT specialists usually are not very 
+literate in banking. Moreover, different lines of business largely work independent
+from one another. Which leads to silo-type structures: integration is well advanced
+within a silo but poor across silos. This means that integration across silos
+still requires a lot of manual work. Tasks that require this type of integration 
+can only be carried out in a suboptimal way. As a consequence, regulatory reporting, 
+which 
+requires presicely this type of integration, is slow and costly. And the cost-income ratio
 of banks is around 60\% or higher. 
 
 
-To overcome these shortcoming, 
-a special infrastructural layer has been developed. 
+To help overcoming these shortcomings, 
+a special infrastructural layer has been developed. However, in order to 
+motivate the need of this layer and its rationale, 
+let's first turn to the fundamental building blocks of finance.
+
+
+
+## Financial contracts --- the molecules of the financial system
+
+The financial system deals with money. Or, more precisely, with the exchange 
+of money. The most elementary element (the atom) is the exchange of a single
+cash flow between two parties. It appropriately describes, e.g., 
+the actions of putting money on or withdrawing
+it from a bank account. However, for most finance activities this is
+a level too low because usually cash flows do not arise in isolation but are 
+bundled together because they form a whole and serve a purpose. 
+These bundles are defined by contractual obligations, 
+so-called financial contracts.
+A bond, a loan, a mortgage are prime examples. If you buy a fixed-rate bond, e.g.,
+you initially pay the sum to invest. Then you get regularly interest payments and
+at the end of its term (maturity) you get your invested money back together with
+the last interest payment. All these payments are defined by the terms of the 
+contract called \emph{bond}. 
+In general, a financial contract defines a set of cash flow exchanges
+between two or more parties. 
+The time and amount of cash flows may depend
+on well-defined external factors. However, the value of these external factors is not 
+known when the contract is concluded and brings an essential element of change
+into the game. Just think of the value of a stock.
+
+To stay in the above-mentioned analogy, 
+financial contracts are the molecules of the financial system. While in nature 
+there are only
+about 100 (stable) atoms, there are millions of different molecules, from simple ones
+as $\text{H}_2\text{O}$ to very complicated, ones such as e.g. alkane chains, 
+that may consist of thousands of atoms. All these molecules serve different purposes.
+Similarly, there are myriads of (often bespoce) financial contracts, 
+which also serve different, partly very special purposes. 
+Examples are structured products, exotic derivatives bonds and over-the-counter 
+contracts.
+
+```{=latex}
+\begin{figure}[h] 
+  \begin{center}
+  \includegraphics[width = 15cm]{./figures/bowtie.pdf}
+  \end{center}
+  \caption{Bowtie structure of the financial system with the ACTUS contract types
+  at its center. Financial contracts have a central role in the structure
+of the financial system. 
+It contains very diverse inputs (left) and outputs (right) but a highly standardized
+and efficient core in the center. }
+  \label{fig:Bowtie}
+\end{figure}
+```
+
+From the central role of financial contracts it's immediately clear that they
+should be the prime focus of standardization. And they should make it possible
+to close the gap in the automation of financial analysis.
+There have indeed been quite a few
+attempts,
+each of them focusing on different subsets of financial contracts and with different
+purposes in mind. FpML, e.g., 
+only focuses on derivatives with the goal of supporting automated transaction. 
+Ontologies such as Fibo classify financial contracts my means of deep hierachies 
+with the goal of unequivocal identification of any financial contract. All these
+standardization efforts, however, fall short in one way or another. In particualr, 
+they are not encompassing and don't provide the information needed for financial
+analysis. Thus, they are not suitable for supporting automated financial analysis.
+To achive this goal, the requirements of financial analytics most be cast. into
+the definition of the standard at its very inception.
+
+However, this requires compatible representations of all different types of 
+contracts. This can best be done at the level of the cash flow stream encoded
+by the contract. Indeed, the whole financial analytics can be computed from
+these cash flow streams \cite{BBS22}. There are three large groups of analytics: 
+liquidity analysis, valuation, and the 
+computation of income. Each of them can be derived from the cash flow stream 
+encoded by a financial contract provided that some additional information is 
+attached to the cash flows \cite{BBS22}. 
+Moreover, only linear mathematical
+operations are required. 
+Aggregation across contracts can be done in a similar way by linear 
+operations \cite{BBS22}. These requirements of financial analytics must be cast 
+into the standard at its very inception.
+
+What is needed is thus a standardized digital representation of the cash flow
+streams that are encoded by the whole universe of financial contracts. Such a 
+standard would allow a very efficient automation of financial analysis because
+it makes apparent the boy-tie structure of the financial system as depicted
+in figure \ref{fig:Bowtie} with a highly standardized, very robust and 
+computationally efficient core at the center and great variety in the wings.
+Such a structure is often found in complex systems showing up in nature and 
+society. An example outside the world of finance is the metabolism. 
+
+This seems a formidable task. However, 
+from the point of view of pure number processing, the huge variety of 
+different contracts shrinks enormously. Because the aim of the standard 
+is not to unequivocally describe what a contract is (= ontology) but how a 
+works. I.e., which cash flows it generates. To put it philosophically, it's not
+a question of being, of unequivocal identification, but of a contract's mode
+of action. 
+
+
+
+\clearpage
+
+## The Algorithmic Contract Type Unified Standard (ACTUS)
+
 The layer we're refering to is the ACTUS 
-standard for digital financial contract representation. ACTUS stands for 
+standard for digital financial contract representation, \ldots
+ACTUS stands for 
 Algorithmic Contract Type Unified Standard. It consists of two part, namely
 
 - the ACTUS Data Dictionary (ADD) and
@@ -67,47 +189,24 @@ Algorithmic Contract Type Unified Standard. It consists of two part, namely
 
 The first standardizes the data involved in a financial contract and the second
 standardizes the definition of financial contracts, i.e., the rules that define 
-who cashflows are exchanged by the involved parties.
+who cashflows are exchanged by the involved parties. 
 
+ACTUS alone cannot be used. It's an enabler. Such as the standardization of nuts 
+of bolts in the 19th century was an enabler.
+A box of standardized 
+nuts and bolts without knowing where they are needed is also
+quite useless. Still, this standardization gave a boost to industrial development. 
 
+The situation in the financial system is somewhat more subtle. Because the part
+that is mandatory for running the daily business is suitably standardized.
+These are the transaction systems. However, there is another layer that concerns
+the analytics of both, for purposes internal to the institution (upper management) 
+and external purposes (e.g. regulation). This parts shows serious shortcomings.
+Unfortunately, usually these shortcomings are papered over and up to now no
+serious effort have been made to fundamentally remedy the situation even though 
+this would save the banks considerable costs and would made regulation more 
+transparent and, as a consequence, the financial system more stable.
 
-
-## Most elementary building blocks: financial contracts
-
-The standard for both parts is defined in a way that it incorporates essential
-parts of the basic banking knowledge, and by this supporting automation across the
-board in a particular way. The reason ACTUS is focussing on financial contracts 
-is that such contracts are the basic building blocs of all financial business
-and thus the technical lynchpin of the financial system. Indeed, the most basic 
-action in all financial activity is the individual single cashflow.
-As, e.g., if you put money on your current account or withdraw money from it.
-Usually, however, cashflows do not occur individually but are tied together by
-some rules. As, e.g., in the case of a bond or a mortgage. And these rules define
-the financial contract. 
-
-```{=latex}
-\begin{figure}[h] 
-  \begin{center}
-  \includegraphics[width = 15cm]{./figures/bowtie.pdf}
-  \end{center}
-  \caption{Bowtie structure of the financial system with the ACTUS contract types
-  at its center.}
-  \label{fig:Bowtie}
-\end{figure}
-```
-
-Financial contracts have a central role in the structure
-of the financial system. This is illustrated in figure \ref{fig:Bowtie}. This 
-structure is often found in complex systems showing up in nature and society. 
-An example outside the world of finance is the metabolism. 
-It contains very diverse inputs (left) and outputs (right) but a highly standardized
-and efficient core in the center. 
-
-
-
-[THIS HAS TO BE ELABORATED ON SOMEWHAT MORE.]
-
-\clearpage
 
 ## The logic of ACTUS
 
@@ -120,6 +219,32 @@ The logic of the processing of ACTUS contracts is shown in figure \ref{fig:ACTUS
   \end{center}
   \caption{The processing logic of ACTUS contracts.}
   \label{fig:ACTUS-logic}
+\end{figure}
+```
+
+```{=latex}
+\begin{figure}[h] 
+  \begin{center}
+  \includegraphics[width = 15cm]{./figures/Cashflow-Aggregation.pdf}
+  \end{center}
+  \caption{Aggregation of many ACTUS contracts. Notice that aggregation of 
+  cash flow stream only requires linear operations (lower part in green).}
+  \label{fig:ContractAggregation}
+\end{figure}
+```
+
+\clearpage
+
+## Sketch of an ACTUS ecosystem
+
+```{=latex}
+\begin{figure}[h] 
+  \begin{center}
+  \includegraphics[width = 15cm]{./figures/System-interactions.png}
+  \end{center}
+  \caption{Sketch of the financial systems. The interactions are transmitted 
+  by financial contracts.}
+  \label{fig:SystemInteractions}
 \end{figure}
 ```
 
@@ -147,6 +272,26 @@ solution based on the ACTUS technology.\footnote{%
 On exsample is the product suite of the Ariadne Business Analytics AG.}
 
 \newpage
+
+# The structure of the FEMSdevPkg
+
+The package is composed of the following parts:
+
+
+- Setup
+
+- Contracts
+
+- Risk factors
+
+- Events
+
+- Aggregation 
+- Analytics
+
+- Structure of the institution
+
+
 
 # Setup
 ```{r, include = FALSE}
@@ -395,5 +540,18 @@ and the difference is larger the larger the market interest rate.}
 
 ```
 
+
+
+```{=latex}
+\begin{thebibliography}{99} 
+  \bibitem{BBS22}
+  W. Breymann, N. Bundi and K. Stockinger, 
+  \emph{Contract-driven financial reporting: building automated analytics 
+  pipelines with algorithmic contracts, Big Data and Distributed Ledger
+  technology.} In V. Ravi and A. K. Cherukuri [eds.] 
+  \emph{Handbook of Big Data Analytics. Vol. 2: Applications in ICT, security 
+  and business analytics.} London, 2022.
+\end{thebibliography}
+```
 
 
