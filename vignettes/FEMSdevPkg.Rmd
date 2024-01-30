@@ -172,55 +172,95 @@ works. I.e., which cash flows it generates. To put it philosophically, it's not
 a question of being, of unequivocal identification, but of a contract's mode
 of action. 
 
-
-
-\clearpage
+<!-- \clearpage -->
 
 ## The Algorithmic Contract Type Unified Standard (ACTUS)
 
-The layer we're refering to is the ACTUS 
-standard for digital financial contract representation, \ldots
-ACTUS stands for 
-Algorithmic Contract Type Unified Standard. It consists of two part, namely
+The standard that has been constructed with the automation of forward-looking
+financial analytics in mind is the so-called ACTUS Algorithmic Contract Type 
+Unified Standard. 
+It consists of two part, namely
 
 - the ACTUS Data Dictionary (ADD) and
 
 - the ACTUS Cashflow Generation Algorithm (ACGA).
 
 The first standardizes the data involved in a financial contract and the second
-standardizes the definition of financial contracts, i.e., the rules that define 
-who cashflows are exchanged by the involved parties. 
+standardizes the digital representation of the cash flow stream encoded by a
+financial contract.  
 
-ACTUS alone cannot be used. It's an enabler. Such as the standardization of nuts 
+Notice that ACTUS cannot be used standalone. It's an enabler. 
+Such as the standardization of nuts 
 of bolts in the 19th century was an enabler.
 A box of standardized 
-nuts and bolts without knowing where they are needed is also
-quite useless. Still, this standardization gave a boost to industrial development. 
+nuts and bolts without using them for the construction of some device is also 
+pointless. Still, this standardization gave a boost to industrial development. 
 
 The situation in the financial system is somewhat more subtle. Because the part
 that is mandatory for running the daily business is suitably standardized.
-These are the transaction systems. However, there is another layer that concerns
-the analytics of both, for purposes internal to the institution (upper management) 
-and external purposes (e.g. regulation). This parts shows serious shortcomings.
-Unfortunately, usually these shortcomings are papered over and up to now no
+These are the transaction systems. However, as has been pointed out above, 
+there is another layer that concerns
+the analytics for both, purposes internal to the institution (upper management) 
+and external purposes (e.g. regulation). These parts show serious shortcomings.
+Unfortunately, usually these shortcomings are papered over and only pop up in
+situations of crises. Up to now no
 serious effort have been made to fundamentally remedy the situation even though 
 this would save the banks considerable costs and would made regulation more 
-transparent and, as a consequence, the financial system more stable.
+transparent and effective, and, as a consequence, the financial system more stable.
 
+\newpage
 
 ## The logic of ACTUS
 
-The logic of the processing of ACTUS contracts is shown in figure \ref{fig:ACTUS-logic}.
+Figure \ref{fig:ACTUS-logic} displays the data-processing logic of an 
+ACTUS contract.
 
 ```{=latex}
 \begin{figure}[h] 
   \begin{center}
   \includegraphics[width = 15cm]{./figures/ACTUS_logic.pdf}
   \end{center}
-  \caption{The processing logic of ACTUS contracts.}
+  \caption{The data-processing logic of an ACTUS contract. [ADD KPIs]}
   \label{fig:ACTUS-logic}
 \end{figure}
 ```
+[The following two paragraphs are compied from the proposal p. 14 and must be 
+adapted. Also the 
+figure in the proposal is different, essentiall a counter-clockwise rotation
+of fig. \ref{fig:ACTUS-logic} by 90 degree.]
+
+We will extend the ADO environment to the DaDFiR3 environment by bringing it to 
+a multi-user cloud-based environment that enables computation at scale for the 
+whole system. The problem is solved of the ACGA by bringing the algorithms on an 
+Apache Spark environment [KSal19]. Here we will complement it by modules for 
+risk models and aggregation. For the following discussion we assume that the 
+collection of all the financial institutions position data is available in the 
+ACTUS standard. Data processing will follow the steps indicated in Figure \ref{fig:ACTUS-logic}. 
+The contract input data in the ACTUS standard are represented by the blue 
+rectangles at top of the input (left) part of the figure. The execution steps 
+consist of (i) creating stochastic risk factor models and scenarios for stress 
+testing and Monte Carlo simulations (represented by the red rectangles at the 
+bottom of the input part); (ii) simulating the contracts’ future cash flows 
+under suitable scenarios for the risk factors (i.e., the arrow that represents 
+the ACTUS algorithms that transforms input data into (raw) cash flow results; 
+(iii) extracting from these cash flows the analytical quantities needed for a 
+suitable level of aggregation (i.e., arrow “Analytics”); and (iv) optional 
+storage of any of these intermediate results in a scalable persistent datastore 
+to allow reuse, trend analysis and comparisons of specific portfolio and 
+scenario subgroups. This analysis enables regulators authorized to access the 
+contract level positions of an institution to assess its vulnerability towards 
+any relevant stress event by suitable aggregation of the granular data. 
+This can be done for individual institutions or for the financial system overall. 
+
+In figure \ref{fig:ACTUS-logic}, the evaluation of risk factor models, 
+the cash-flow generation, and the performance of the analytics are separate steps. 
+This serves two purposes: (i) Separating the huge number of contract information 
+that is known (since it’s written in the contracts) from the stochastic, 
+and thus a priori unknown risk factor information, in view of transparent and 
+parsimonious modeling; 
+(ii) supporting the efficient computation of a large variety of analytical 
+quantities by only changing the aggregation part. 
+
 
 ```{=latex}
 \begin{figure}[h] 
