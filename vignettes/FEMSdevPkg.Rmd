@@ -196,8 +196,8 @@ A box of standardized
 nuts and bolts without using them for the construction of some device is also 
 pointless. Still, this standardization gave a boost to industrial development. 
 
-The situation in the financial system is somewhat more subtle. Because the part
-that is mandatory for running the daily business is suitably standardized.
+The situation in the financial system is somewhat more subtle. The part
+that is mandatory for running the daily business is indeed suitably standardized.
 These are the transaction systems. However, as has been pointed out above, 
 there is another layer that concerns
 the analytics for both, purposes internal to the institution (upper management) 
@@ -212,47 +212,76 @@ transparent and effective, and, as a consequence, the financial system more stab
 
 ## The logic of ACTUS
 
-Figure \ref{fig:ACTUS-logic} displays the data-processing logic of an 
-ACTUS contract.
+```{=latex}
+\begin{figure}[t] 
+  \begin{center}
+  \includegraphics[width = 15cm]{./figures/ACTUS_logic.pdf}
+  \end{center}
+  \caption{The data-processing logic of an ACTUS contract.}
+  \label{fig:ACTUS-logic}
+\end{figure}
+```
+
+Figure \ref{fig:ACTUS-logic} displays the data-processing logic of a ACTUS 
+contract, which is represented as the green box in the center. You can think
+of this box of containing the contract data as nominal, interest rate, start
+date, maturity date, etc. These data together with the rules of how to convert
+them into future cash flows define the contents of the contract. This information,
+however, is not sufficient to derive the future cash flow stream. The reason is 
+that some contractual terms make reference to outside quantities. For a variable bond,
+e.g., the market interest rate is needed for each data, when the interest to be
+paid is adapted to the then prevailing market date. An option on a stock requires
+the knowledge of the stock price. Different contract require different information
+elements from a contract's economic-financial environment. These is data about 
+future market developments, 
+which is not available at the time of the evaluation of the future cash flows. 
+They introduce an important element of risk in the evaluation of a contrast's
+future cash flows. Therefore they are henceforce called risk factors.
+
+From the contract data and the risk factor data, a contract's future cash flow
+stream can be evaluated by means of the ACTUS Cash-flow Generating Algorithm (ACGA).
+This is indicated by the elliptical box under the contract box. The result (light
+blue line in the middle) is
+the contract's cash flows conditional to the risk factor scenario used in the 
+evaluation. These are the raw results. From these raw results, all further analysis
+can be derived, cf. dark blue box at the bottom.
+
+## Portfolios of contracts and different risk factor scenarios
 
 ```{=latex}
 \begin{figure}[h] 
   \begin{center}
-  \includegraphics[width = 15cm]{./figures/ACTUS_logic.pdf}
+  \includegraphics[width = 15cm]{./figures/ACTUS_logic2.png}
   \end{center}
-  \caption{The data-processing logic of an ACTUS contract. [ADD KPIs]}
-  \label{fig:ACTUS-logic}
+  \caption{Data processing for a portfolio of $n$ contracts and $k$ risk factor
+  environments.}
+  \label{fig:ACTUS-logic2}
 \end{figure}
 ```
-[The following two paragraphs are compied from the proposal p. 14 and must be 
-adapted. Also the 
-figure in the proposal is different, essentiall a counter-clockwise rotation
-of fig. \ref{fig:ACTUS-logic} by 90 degree.]
 
-We will extend the ADO environment to the DaDFiR3 environment by bringing it to 
-a multi-user cloud-based environment that enables computation at scale for the 
-whole system. The problem is solved of the ACGA by bringing the algorithms on an 
-Apache Spark environment [KSal19]. Here we will complement it by modules for 
-risk models and aggregation. For the following discussion we assume that the 
-collection of all the financial institutions position data is available in the 
-ACTUS standard. Data processing will follow the steps indicated in Figure \ref{fig:ACTUS-logic}. 
+Figure \ref{fig:ACTUS-logic2} illustrates what happens in the case of a portfolio
+of $n$ contracts and the presence of $k$ risk factor scenarios.
 The contract input data in the ACTUS standard are represented by the blue 
-rectangles at top of the input (left) part of the figure. The execution steps 
+rectangles at the top of the input (left) part of the figure. The execution steps 
 consist of (i) creating stochastic risk factor models and scenarios for stress 
 testing and Monte Carlo simulations (represented by the red rectangles at the 
 bottom of the input part); (ii) simulating the contracts’ future cash flows 
 under suitable scenarios for the risk factors (i.e., the arrow that represents 
 the ACTUS algorithms that transforms input data into (raw) cash flow results; 
 (iii) extracting from these cash flows the analytical quantities needed for a 
-suitable level of aggregation (i.e., arrow “Analytics”); and (iv) optional 
-storage of any of these intermediate results in a scalable persistent datastore 
-to allow reuse, trend analysis and comparisons of specific portfolio and 
-scenario subgroups. This analysis enables regulators authorized to access the 
-contract level positions of an institution to assess its vulnerability towards 
-any relevant stress event by suitable aggregation of the granular data. 
-This can be done for individual institutions or for the financial system overall. 
+suitable level of aggregation (i.e., arrow “Analytics”). 
+<!-- and (iv) optional  -->
+<!-- storage of any of these intermediate results in a scalable persistent datastore  -->
+<!-- to allow reuse, trend analysis and comparisons of specific portfolio and  -->
+<!-- scenario subgroups. This analysis enables regulators authorized to access the  -->
+<!-- contract level positions of an institution to assess its vulnerability towards  -->
+<!-- any relevant stress event by suitable aggregation of the granular data.  -->
+<!-- This can be done for individual institutions or for the financial system overall.  -->
+Notice that in step (iii) with the exception of the evaluation of risk measures,
+all operations that require extensive aggregation are linear operations (additions
+and multiplications) and can very well be executed with databases. 
 
-In figure \ref{fig:ACTUS-logic}, the evaluation of risk factor models, 
+In figure \ref{fig:ACTUS-logic2}, the evaluation of risk factor models, 
 the cash-flow generation, and the performance of the analytics are separate steps. 
 This serves two purposes: (i) Separating the huge number of contract information 
 that is known (since it’s written in the contracts) from the stochastic, 
@@ -262,23 +291,19 @@ parsimonious modeling;
 quantities by only changing the aggregation part. 
 
 
-```{=latex}
-\begin{figure}[h] 
-  \begin{center}
-  \includegraphics[width = 15cm]{./figures/Cashflow-Aggregation.pdf}
-  \end{center}
-  \caption{Aggregation of many ACTUS contracts. Notice that aggregation of 
-  cash flow stream only requires linear operations (lower part in green).}
-  \label{fig:ContractAggregation}
-\end{figure}
-```
-
-\clearpage
-
-## Sketch of an ACTUS ecosystem
+<!-- ```{=latex} -->
+<!-- \begin{figure}[h]  -->
+<!--   \begin{center} -->
+<!--   \includegraphics[width = 15cm]{./figures/Cashflow-Aggregation.pdf} -->
+<!--   \end{center} -->
+<!--   \caption{Aggregation of many ACTUS contracts. Notice that aggregation of  -->
+<!--   cash flow stream only requires linear operations (lower part in green).} -->
+<!--   \label{fig:ContractAggregation} -->
+<!-- \end{figure} -->
+<!-- ``` -->
 
 ```{=latex}
-\begin{figure}[h] 
+\begin{figure}[hb] 
   \begin{center}
   \includegraphics[width = 15cm]{./figures/System-interactions.png}
   \end{center}
@@ -287,6 +312,18 @@ quantities by only changing the aggregation part.
   \label{fig:SystemInteractions}
 \end{figure}
 ```
+
+
+## Toward the analysis of the financial system --- Sketch of an ACTUS ecosystem
+
+At the end of this introduction we want to briefly point out the possibilities 
+that open up if all banks have their contracts in the ACTUS format. If the 
+contract information of all the contracts of all banks is available in a central 
+database then it would be possible to simulate the future development of all
+the banks conditional to the defined risk factor scenarios. I.e., the future 
+development of the financial system. This is schematically sketched in figure \ref{fig:SystemInteractions}. This would be a powerful tool in the hand of 
+regulators in situations of crises.
+
 
 
 \clearpage
