@@ -468,13 +468,237 @@ cashflowPlot(evs2)
 
 # Risk factors
 
+\clearpage
+
 # Events
+
+There is a function called \verb+getEventParameters()+ that returns a list of 
+event types with the associated short names long names and indications of
+how the events are drawn in the plot function.
+
+```{=latex}
+\begin{table}
+\caption{List of event typew}
+\begin{tabular}{lllcc}
+Abbreviation & description & color & linetype & linewidth
+\\\hline
+CDD   & Contract Deal Date       & black     & 1 & 2.0\\
+IED   & Initial Exchange Date    & red       & 1 & 2.0\\
+PRD   & Purchase Date            & red       & 1 & 2.0\\
+IP    & Interest Payment         & darkgreen & 1 & 1.5\\
+IA    & Interest Accrual         & darkgreen & 2 & 1.5\\
+IPCI  & Interest Capitalisation  & darkgreen & 2 & 1.5\\
+PR    & Principal Redemption     & red       & 1 & 2.0\\
+RR    & Rate Resetting           & green     & 1 & 1.5\\
+MD    & Maturity Date            & red       & 1 & 2.0\\
+TD    & Termination Date         & red       & 1 & 2.0\\
+DV    & Dividend Payment         & blue      & 1 & 1.5\\
+MR    & Margining Payment        & darkblue  & 1 & 1.5\\
+STD   & Settlement Date          & darkblue  & 1 & 1.5\\
+OPPD  & Option Premium Payment   & red.      & 1 & 2.0\\
+OPXED & Option Exercise End Date & red       & 1 & 2.0\\
+AD0   & Analysis Date            & black     & 1 & 2.0\\
+OPS   & Operational Cashflow     & darkgreen & 1 & 2.0\\
+DPR   & Depreciation             & darkgreen & 2 & 2.0\\
+RES   & Reserves                 & red       & 1 & 2.0\\
+ETA   & External Transaction     & red       & 1 & 2.0\\
+ITF   & Internal Transfer        & red       & 1 & 2.0\\
+NominalValue & NominalValue:     & red       & 2 & 2.0
+\end{tabular}
+\end{table}
+```
+
+\clearpage
 
 # Aggregation 
 
 # Analytics
 
+\clearpage
+
 # The Structure of an institution
+
+An institution is modeled as a hierarchical tree. To this respect we use the 
+\verb+data.tree+ package that makes available the possibility to create 
+models that consist of a hierarchy of nodes (class \verb+Node+). A large variety
+of attributes. an be attached to each node and there are functions for carrying out recursive
+computations on the node and aggregation across the tree.
+In general, a node has one parent and an arbitrary number of children. The uppermost 
+node (top node or origin of the tree) has no parent. Nodes without children are
+called "leaf nodes". 
+
+Contracts are contained in the leaf nodes of the model. Technically, this is done
+by means of a list of the Ids of the contracts assciated with a given leaf node.
+Each contract is associated only to one node.
+
+Let's take the example of a simple power plant. To be specific, power is generated
+from gas, so it's a gas power plant. A model of the financial structure of this
+plant may look as follows:
+```{=latex}
+\begin{verbatim}
+         levelName
+1 PowerPlant      
+2  ¦--Assets      
+3  ¦   °--LongTerm
+4  ¦--Liabilities 
+5  ¦   ¦--Debt    
+6  ¦   °--Equity  
+7  °--Operations  
+8      ¦--Revenues
+9      °--Expenses
+\end{verbatim}
+```
+The origin is labeld PowerPlant. It has three children nodes, namely \verb+Assets+,
+\verb+Liabilities+ and \verb+Operations+. The first two parts are the usual sections
+of a balance sheet. The first section contains financial and technical assets,
+the second all types of debt as well as equity. In addition, we must model the revenues 
+and expenses that arise when operating the plant. This is done in the section
+third node labeled \verb+Operations+. All these nodes have children nodes, and the 
+children nodes may have other children nodes. But with this structure we can 
+already model a simple plant. Here, \verb+LongTerm+, \verb+Debt+, \verb+Equity+, 
+\verb+Revenues+, and \verb+Expenses+ are the leave accounts. 
+
+In order to get a sensible model, this structure needs contents. The contents is 
+contained in the contracts that are attached to the leaf nodes. In this simple case
+we just have single contracts in the nodes \verb+LongTerm+, \verb+Debt+, \verb+Revenues+,
+and \verb+Expenses+. The \verb+Equity+ node plays a special role because the 
+value of equity is defined as the difference of the total value of the firms assets
+minus the total value of its debt.
+
+\newpage
+
+# Analytics
+
+Analytics is carried out at the level of the individual contracts and then 
+first aggregated across contracts at the level of each leaf node and then 
+across the nodes of the tree. There are three standard types of analytics:
+
+- liquidity
+- income
+- value
+
+Liquidity just aggregates all incoming and outgoing cash flows of the defined time 
+periods. Income aggregates those cash flows that are relevant for income, plus
+certain non-cashflow events. Value aggregates the value of all contracts.
+
+Let's illustrate this for the example of the powerplant. The following report
+shows the yearly liquidity of the powerplant from the years 2018 till 2022. 
+```{=latex}
+\begin{verbatim}
+                      2018   2019   2020   2021   2022
+1 PowerPlant         42.19  46.68  63.37  80.06  96.74
+2  ¦--Assets       -100.00   0.00   0.00   0.00   0.00
+3  ¦   °--LongTerm -100.00   0.00   0.00   0.00   0.00
+4  ¦--Liabilities   100.00 -12.00 -11.80 -11.60 -11.40
+5  ¦   ¦--Debt      100.00 -12.00 -11.80 -11.60 -11.40
+6  ¦   °--Equity      0.00   0.00   0.00   0.00   0.00
+7  °--Operations     42.19  58.68  75.17  91.66 108.14
+8      ¦--Revenues  129.67 145.44 161.21 176.98 192.74
+9      °--Expenses  -87.48 -86.76 -86.04 -85.32 -84.60
+\end{verbatim}
+```
+The
+numbers are million EUR. The \verb+LongTerm+ node contains the technical asset
+that represents the plant. The outflow of 100mio EUR in 2018 is the initial investment.
+Thereafter, there is no further outflow. The numbers in the parent node \verb+Assets+
+are the same because this node has only a single child.
+The money for the investment has been
+borrowed. This is modeled by a loan in the \verb+Debt+ node. The loan has an 
+initial value of also 100mio EUR with a linear amortisation over 10 years, i.e.,
+10mio EUR/year. The interest rate is 2\%. Corespondingly, there is an initial 
+inflow in 2018 of 100mio EUR. The outflow in 2019 is 10mio EUR for amortisation
+plus 2mio EUR in interest. The next year, interest has only to be paid on the
+remaining 90mio EUR so that the outgoing cashflow is reduced to 11.8mio EUR. And 
+so on. The numbers in the parent node \verb+Liabilities+ are the same even though
+this node has two children. The reason is that the node \verb+Equity+ 
+does not produce cash flows. The nodes \verb+Revenues+ and \verb+Expenses+ contain
+the operational revenues and expenses, according to their names. The node \verb+Operations+
+is thus the some of the corresponding values of its two children nodes.
+
+Instead of computing the cashflows per period, we can also aggregate them over
+the years. This results in the following table:
+```{=latex}
+\begin{verbatim}
+                      2018    2019    2020   2021    2022
+1 PowerPlant         42.19   88.87  152.24  232.3  329.04
+2  ¦--Assets       -100.00 -100.00 -100.00 -100.0 -100.00
+3  ¦   °--LongTerm -100.00 -100.00 -100.00 -100.0 -100.00
+4  ¦--Liabilities   100.00   88.00   76.20   64.6   53.20
+5  ¦   ¦--Debt      100.00   88.00   76.20   64.6   53.20
+6  ¦   °--Equity      0.00    0.00    0.00    0.0    0.00
+7  °--Operations     42.19  100.87  176.04  267.7  375.84
+8      ¦--Revenues  129.67  275.11  436.32  613.3  806.04
+9      °--Expenses  -87.48 -174.24 -260.28 -345.6 -430.20
+\end{verbatim}
+```
+
+Let's now have a look at the balance sheet, which contains the value (positive on 
+the asset side and negative on the liability side) of the firms positions.
+It looks like this:
+\clearpage
+```{=latex}
+\begin{verbatim}
+                   18-01-02 19-01-02 20-01-02 21-01-02 22-01-02 23-01-02
+1 PowerPlant              0        0        0        0        0        0
+2  ¦--Assets              0      100       90       80       70       60
+3  ¦   °--LongTerm        0      100       90       80       70       60
+4  °--Liabilities         0     -100      -90      -80      -70      -60
+5      ¦--Debt            0     -100      -90      -80      -70      -60
+6      °--Equity          0        0        0        0        0        0
+\end{verbatim}
+```
+Here, \verb+Operations+ is missing because no intrinsic value is attributed to operational
+revenues and expenses. The value is generated by the difference of the revenue
+cashflow and the expense cashflow shown in the liquidity report. In a real firm
+this difference is kept in a cash account until further use is made of it. Here
+we have not allowed for such a cash account.
+Thus, we just have initial 100mio EUR for the investment and initial -100 EUR for 
+the loan. The investment is written of by 10mio EUR per year which reduces its 
+book value accordingly. The model is constructed in such a way that the reduction
+of the plants book value is exactly equal to the amortisation of the loan. Therefore
+both value cancel exactly so that equity is zero.
+
+It is clear that this is not realistic. From the liquidity report we see that 
+for 2018 there is an excess liquidity of 42.19mio EUR, which is the profit
+of the plant. This should be reported in the balance sheet as of end of 2018 
+(here Jan 2, 2019). However, this sum is lost. The total sum that gets lost 
+over the 5 years of the simulation can be seen by looking at the cumulated
+liquidity. It amounts to nearly 330mio EUR.
+
+## The cash collector
+
+The aggregated liquidity per period must somehow be carried over to the next 
+period in order not to get lost during the simulation of the institution into 
+the future. This is done at the level of the entire institution. Since the quantity
+to be carried over is the aggregated liquidity at the level of the institution,
+its computation can directly be used. This could be done, e.g., by adding a 
+special leaf node (to be called, e.g., \verb+Cash+). The values of the cumulated
+liquidity at the level of the institution can directly be copied into this account.
+Notice, that no real cash flows are associated with this operation. It is a pur
+booking exercise.
+
+However, there is an additional component that must be taken into account. This
+is the interest paid to this money. Thus, for every period, interest must be 
+added to the value of this account for the corresponding period. 
+If we integrate this into the model, we get the following balance sheet:
+```{=latex}
+\begin{verbatim}
+                    18-01-02 19-01-02 20-01-02 21-01-02 22-01-02 23-01-02
+1 PowerPlant               0     0.00     0.00     0.00     0.00     0.00
+2  ¦--Assets               0   143.03   181.51   237.97   312.78   406.31
+3  ¦   ¦--Cash             0    43.03    91.51   157.97   242.78   346.31
+4  ¦   °--LongTerm         0   100.00    90.00    80.00    70.00    60.00
+5  °--Liabilities          0  -143.03  -181.51  -237.97  -312.78  -406.31
+6      ¦--Debt             0  -100.00   -90.00   -80.00   -70.00   -60.00
+7      °--Equity           0   -43.03   -91.51  -157.97  -242.78  -346.31
+\end{verbatim}
+```
+Here, we have an additional node \verb+Cash+ that contains the cumulated liquidity
+plus the interest earned with this money. The interest rate to be used should
+be rates typically paid to a current account, i.e., short term rates.
+
+
+\clearpage
 
 # Demos with graphical user interface
 
