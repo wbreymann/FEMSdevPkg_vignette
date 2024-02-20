@@ -1,5 +1,5 @@
 ---
-title: "The FEMSdevPkg"
+title: "The FEMS Package"
 output: 
   rmarkdown::pdf_document:
     toc: true
@@ -7,7 +7,7 @@ output:
     number_sections: true
 
 vignette: >
-  %\VignetteIndexEntry{FEMSdevPkg}
+  %\VignetteIndexEntry{FEMS Package}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 author: "Henriette Elise Breymann and others"
