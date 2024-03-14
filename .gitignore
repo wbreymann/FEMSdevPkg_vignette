@@ -46,6 +46,11 @@ examples/*.run.xml
 examples/*.synctex.gz
 examples/*.tex
 examples/*.toc
+examples/*.log
+examples/*.nav
+examples/*.snm
+examples/*.vrb
+
 
 # OAuth2 token, see https://github.com/hadley/httr/releases/tag/v0.3
 .httr-oauth
