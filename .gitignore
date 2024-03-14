@@ -36,7 +36,17 @@ vignettes/*.run.xml
 vignettes/*.synctex.gz
 vignettes/*.tex
 vignettes/*.toc
-  
+
+# examples subdirectory
+examples/*.html
+examples/*.pdf
+examples/*.bbl
+examples/*.bcf
+examples/*.run.xml
+examples/*.synctex.gz
+examples/*.tex
+examples/*.toc
+
 # OAuth2 token, see https://github.com/hadley/httr/releases/tag/v0.3
 .httr-oauth
 
