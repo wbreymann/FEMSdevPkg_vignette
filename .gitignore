@@ -12,6 +12,9 @@
 # User-specific files
 .Ruserdata
 
+# Code extracted from FEMS vignette
+FEMS.R
+
 # Example code in package build process
 *-Ex.R
 
