@@ -1,4 +1,4 @@
-\documentclass[12pt]{article}
+\documentclass[11pt]{article}
 \usepackage[]{graphicx}
 \usepackage[cymk,table]{xcolor}
 
@@ -41,6 +41,7 @@
  \addtolength{\oddsidemargin}{-2cm}
  \addtolength{\textheight}{4cm}
  \addtolength{\topmargin}{-2.5cm}
+ \renewcommand{\bottomfraction}{\topfraction}
 % \addtolength{\footskip}{3cm}
 %
 % ----------------------------------------------------------------
@@ -52,7 +53,6 @@
 
 
 \begin{document}
-\SweaveOpts{concordance=TRUE}
 % common definitions and options
 %knit_child("common.Rnw")
 
@@ -184,8 +184,9 @@
 \thispagestyle{empty}
 
 
-\newpage
+% \newpage
 
+\section*{Thanks}
 
 \section{Introduction}
 
@@ -345,7 +346,7 @@ works. I.e., which cash flows it generates. To put it philosophically, it's not
 a question of being, of unequivocal identification, but of a contract's mode
 of action.
 
-\clearpage
+% \clearpage
 
 \subsection{The Algorithmic Contract Type Unified Standard (ACTUS)}
 
@@ -359,6 +360,16 @@ It consists of two part, namely
   \item
   the ACTUS Cashflow Generation Algorithm (ACGA).
 \end{itemize}
+
+\subsection{The logic of ACTUS}
+\label{ss:ACTUS-logic}
+\begin{figure}[t]
+  \begin{center}
+  \includegraphics[width = 15cm]{./figures/ACTUS_logic.pdf}
+  \end{center}
+  \caption{The data-processing logic of an ACTUS contract.}
+  \label{fig:ACTUS-logic}
+\end{figure}
 
 
 The first standardizes the data involved in a financial contract and the second
@@ -384,17 +395,7 @@ serious effort have been made to fundamentally remedy the situation even though
 this would save the banks considerable costs and would made regulation more
 transparent and effective, and, as a consequence, the financial system more stable.
 
-\newpage
-
-\subsection{The logic of ACTUS}
-
-\begin{figure}[t]
-  \begin{center}
-  \includegraphics[width = 15cm]{./figures/ACTUS_logic.pdf}
-  \end{center}
-  \caption{The data-processing logic of an ACTUS contract.}
-  \label{fig:ACTUS-logic}
-\end{figure}
+% \newpage
 
 Figure \ref{fig:ACTUS-logic} displays the data-processing logic of a ACTUS
 contract, which is represented as the green box in the center. You can think
@@ -472,7 +473,7 @@ quantities by only changing the aggregation part.
 % <!--   \label{fig:ContractAggregation} -->
 % <!-- \end{figure} -->
 
-\begin{figure}[hb]
+\begin{figure}
   \begin{center}
   \includegraphics[width = 15cm]{./figures/System-interactions.png}
   \end{center}
@@ -492,37 +493,57 @@ the banks conditional to the defined risk factor scenarios. I.e., the future
 development of the financial system. This is schematically sketched in figure \ref{fig:SystemInteractions}. This would be a powerful tool in the hand of
 regulators in situations of crises.
 
-\subsection{Using ACTUS with FEMSdevPkg}
+\subsection{Using ACTUS with the FEMS package}
 
 ACTUS provides an infrastructural layer that
 makes financial analysis much more powerful. But it cannot be used in
 isolation. It's an enabler that needs an environment to make use of it.
 In order to give potential users the possibility to become acquainted with ACTUS
 and the range of possibilities it provides, we've build the R-package
-\verb+FEMSdevPkg+. So it requires R as platform to run it. The ACTUS algorithms
+\verb+FEMS+. So it requires R as platform to run it. The ACTUS algorithms
 are running on a separate server and the requests to the server and its answers
 are provided through an interface.
 
 
-The \verb+FEMSdevPkg+ gives users the possibility to try out
+The \verb+FEMS+ package gives users the possibility to try out
 the modeling of single financial contracts, portfolios of contracts or whole
 institution on a demo level. The package uses the ACTUS contract standard and
 cash flow generating algorithms that are transparent, efficient and meant to be
-usable for even large scale institutions. The aim of this package, however. is
+usable for even large scale institutions. The aim of this package, however, is
 to give users easy access to this technology at an introductory and  demonstration
 level. For production level systems the interest users should look for professional
 software solutions based on the ACTUS technology.\footnote{%
 On example is the product suite of the Ariadne Business Analytics AG.}
 
-% <!-- \newpage -->
+% \clearpage
 
-\section{The structure of the FEMSdevPkg}
+\section{The structure of the FEMS package}
+
+As already stated above, the \verb+FEMS+ package provides functionality for the
+modeling, simulation and analysis of the financial side of banks, other financial
+institutions and also non-financial corporates. 
+
+The philosophy was to use as
+far as possible to typical R-type generic function syntax so that the look and feel is similar
+to other R packages. A case in point are the analytical functions \verb+liquidity+,
+\verb+value+ and \verb+income+. They can be used on a variety of object such as 
+single contracts, portfolios of contracts and whole institutions with the
+same syntax. The idea behind this choice is to facilitate the writing of scripts.
+Moreover, the logic is viewed from the point of view of the user, not the point of 
+view of the programmer. At least, that is what we attempted to do. 
+
+Notice that for the arguments' names we do not use the ACTUS names but simplified 
+versions in order to facilitate becoming familiar with the system.
+However, the ACTUS names also work, and the more advanced user will encounter them
+at one point or the other.
+
+Another point is that for further analysis as well as graphical presentation of
+the results the whole power of R can be used.
 
 The package is composed of the following parts:
-
 \begin{itemize}
 \item
-Setup
+Installation and setup
 \item
 Contracts
 \item
@@ -540,19 +561,32 @@ Demos with graphical user interface
 \end{itemize}
 
 
-\section{Setup}
-<<include = FALSE>>=
+\section{Installation and setup}
+
+<<include = FALSE,echo=FALSE>>=
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
+@ 
+The \verb+FEMS+ package is available on a public github. In can be installed on
+R in the following way:
+<<eval=FALSE,results='hide',message=FALSE>>=
+# Packages required by FEMS:
+packageList <- c("timeDate", "timeSeries", "zoo", "httr", "lubridate", "fmdates",
+                 "jsonlite", "readxl", "data.tree", "devtools")
+# Installing these packages from CRAN:
+install.packages(packageList, repos="https://cloud.r-project.org")
+# To install FEMS from public github
+devtools::install_github("wbreymann/FEMS")
+@
+
+Then, the library is called in the usual way:
+<<results='hide',message=FALSE>>=
 library(FEMS)
 options(warn=-1)
 @
 
-```{r setup, warning = FALSE, message=FALSE, results='hide'}
-library(FEMS)
-@
 For the calculations, a server from [ACTUS Financial Research Foundation](www.actusfrf.com) hosted by ZHAW is used.
 Here we define the serverURL required for all calculations.
 <<>>=
@@ -566,87 +600,182 @@ Now we are all set to start creating contracts.
 
 \subsubsection{Fixed Rate Contracts}
 
-Let's start with a simple PAM (Principal at Maturity) contract.
+Let's start with a simple bond (called \verb+PAM+ or \verb+Principal at Maturity+ 
+in ACTUS language). To define a bond, we need to know at least its start date, 
+time to maturity, nominal value, and coupon rate (which is the interest rate paid out).
+In addition, we have to set its role, namely, whether its long or short. 
+The following lines define a long bond with starting date July 31, 2013, time to maturity 
+of 3 years, a nominal value of 1000 and a coupon rate of 2\%.
 <<>>=
-pam1 <- bond(start="2013-12-31", maturity = "5 years", nominal = 1000,
+t0 <- "2013-12-31"
+bond1 <- bond(start="2013-12-31", maturity = "3 years", nominal = 1000,
                coupon = 0.02, role = "long")
 @
+Notice that in this minimal version the currency is not specified. It's implicitly
+assumed to be CHF but can be set explicitly. 
 
-We can have a look at the contract terms.
+We can have a look at important contract terms by simply typing the contract name:
 <<>>=
-# unlist(pam1$contractTerms)
-pam1
+bond1
 @
 
-With the function `generateEventSeries()` we can generate all events of the contract.
-The functions takes the following arguments:
+With the function \verb+events+ we can generate all events of the contract.
+The function takes the following mandatory arguments:
 \begin{description}
-  \item[`contract`]
-  The contract object
-  \item[`riskFactors`]
-  A list of risk factors (can also be empty)
-  \item[`serverURL`]
-  The URL of the server to be used for the calculations
+  \item[objcet]
+  The contract or portfolio or institution object
+  \item[ad]
+  The analysis date as per which all future events are to be derived
+  \item[model]
+  Optionally, the risk factor enviornment conditional to which events are computed
 \end{description}
 
 <<>>=
-evs <- events(pam1, "2013-12-31")
-print(evs, indices=c(-4,-9))
+evs <- events(bond1, t0)
+# print(evs, indices=c(-4,-9))
+print(evs)
 @
 
-The events can be plotted afterwards by calling the function `cashflowPlot()`.
-<<>>=
-cashFlows(pam1, "2013-12-31")
+The events can be plotted by calling the function \verb+plot+ after the \verb+events+ function.
+Notice that \verb+plot+ takes a contract object as argument.
+<<eval=FALSE>>=
+plot(bond1, t0)
+@
+
+<<echo=FALSE,out.extra = 'height=12cm,width=15cm'>>=
+plot(bond1, t0)
 @
 
 \subsubsection{Variable Rate Contracts}
-Contracts can also have variable interest rates. Herefore, we need to initialize some interest rate risk factors first.
+\label{sss:floater}
+Contracts can also have variable interest rates. Herefore, we need to initialize 
+some interest rate risk factors first. This is done with the command \verb+YieldCurve+.
+Here we define a 1-month-rate of 1\%, a 20-year-rate of 4\% and interpolate
+linearly. 
 
-% <!-- First of all, let's load the sample data from the package. -->
-% <!-- Suggestion: We could make it available inside the package and load it from there. -->
-% <!-- <<>>= -->
-% <!-- mydatadir <- "./mydata" -->
-% <!-- installSampleData(mydatadir) -->
-% <!-- @ -->
-%
-% <!-- Now we can load the sample data. -->
-% <!-- <<>>= -->
-% <!-- falling_fp <- paste0(mydatadir,"/UST5Y_fallingRates.csv") -->
-% <!-- rising_fp <-  paste0(mydatadir,"/UST5Y_risingRates.csv") -->
-% <!-- rfx_falling <- sampleReferenceIndex(falling_fp,"UST5Y_fallingRates",  -->
-% <!--                                     "YC_EA_AAA",100) -->
-% <!-- rfx_rising <- sampleReferenceIndex(rising_fp,"UST5Y_risingRates", -->
-% <!--                                    "YC_EA_AAA",100) -->
-% <!-- @ -->
-%
-% <!-- After that we can create a contract with variable rates and generate the events and outputs as before. -->
-% <!-- <<>>= -->
-% <!-- pam2 <- bondvr("2020-12-31", maturity = "5 years", nominal = 50000, -->
-% <!--                coupon = 0.02, paymentFreq = "3 months", role = "long", -->
-% <!--                rateResetFreq = "1 years", rateResetSpread = 0.01 ) -->
-% <!-- unlist(pam2$contractTerms) -->
-% <!-- evs2 <- generateEventSeries(pam2, list(rfx_falling), serverURL) -->
-% <!-- evs2$events_df -->
-% <!-- @ -->
-% <!-- And also the cashflow plot. -->
-% <!-- **Need to figure out a way to adjust the size of the plot, not good yet!!** -->
-% <!-- <<width = 12, height = 8>>= -->
-% <!-- cashflowPlot(evs2) -->
-% <!-- @ -->
+<<>>=
+irShort <- 0.01
+irLong <- 0.04
+# ir.spread <- 0.01
+yc <- YieldCurve(label = "YC.CHF", 
+                 ReferenceDate = t0, 
+                 Tenors = c("1W", "20Y"), Rates = c(irShort, irLong))
+rf <- RFConn(yc)
+@
+
+Together with possibly other risk factors the yield curve is bundled into a 
+risk factor environment by the command \verb+RFConn+:
+<<>>=
+rf <- RFConn(yc)
+@
+For more details, cf. below.
+
+The yield curve can be plotted as well:
+<<eval=FALSE>>=
+plot(yc)
+@
+<<echo=FALSE,out.extra = 'height=12cm,width=15cm'>>=
+plot(yc)
+@
+
+To define a floating bond, we must specify a cycle of rate reset and the label
+under which the ACTUS server can find the yield curve. This is respectively done
+with the arguments \verb+CycleOfRateReset+ and \verb+MarketObjectCodeOfRateReset+. 
+<<>>=
+bond2 <- bond(ContractID="002", start = t0, maturity = "5 years", 
+                      nominal = 1000, coupon = 0.02, role="long", 
+                      CycleOfRateReset="P1YL0", MarketObjectCodeOfRateReset="YC.CHF") 
+@
+In this example, the value of the argument \verb+CycleOfRateReset="P1YL0"+ means 
+that the interest rate is reset to the market rate every year. In order to retrieve
+the according information, the corresponding forward rates are computed from the
+yiedl curve with the label \verb+"YC.CHF2"+. Notice that this is the label used 
+in the yield curve definition above.
+
+To compute the events, we pass the risk ractor environment \verb+rf+ as third argument 
+into the \verb+events+ command:
+<<echo=c(1,3)>>=
+evs <- events(bond2, t0, model=rf)
+# print(evs, indices=c(-4,-9))
+print(evs)
+@
+
+The events can be plotted by calling the function \verb+plot+. Notice that in addition
+to the result object from the \verb+events+ command we need to specify the starting
+time.
+<<eval=FALSE,echo=2>>=
+# plot(bond2, t0, rf)
+plot(evs, t0)
+@
+<<echo=FALSE,out.extra = 'height=12cm,width=15cm'>>=
+plot(evs, t0)
+@
 
 \subsection{Portfolios of contracts}
 
+Usually we are not interested in a single contract but in a portfolio of contracts.
+We will here show this for a sample portfolio.
+
+<<>>=
+Portfolio(list(bond1,bond2))
+@
+
+Events for portfolios can be computed in the same way as events for a single 
+contract. The resulting event series are just concatenated.
+<<>>=
+ptf <- Portfolio(list(bond1,bond2))
+evs.ptf <- events(ptf, t0, model=rf)
+print(evs.ptf)
+@
+
+
 \section{Risk factors}
 
-\clearpage
+In subsection~\ref{ss:ACTUS-logic} of the introduction chapter the importance of 
+the financial-economic context or risk-factor-environment is pointed out. It's 
+represented in red in figure~\ref{fig:ACTUS-logic}. This information is needed
+because depending on the contract the future cash flows depend on future values
+of the external environment. The interest rate reset of floating bonds is a case
+in point. 
 
-\section{Events}
+Future market rates obviously are not known today. We must predict them by appropriate
+models, and these models or the results of such models must be provided to the system.
+The most frequent external information needed concerns market interest rates.
+This is way we have provided a built-in model that computes forward interest rate
+from a yield curve provided to the system. The underlying assumption is that these 
+forward rates provide the expectation of future spot interest rates. E.g., according
+to this assumption the forward rate $f_{2,3}$ from year 2 to year 3 should be the expectation
+of the 1 year spot rate in two years. Even though we empirically know that this 
+assumption is wrong, it's often used in practice for modeling purposes.
+
+The risk factor environment is contained in a so-called risk-factor connector.
+It is defined by the command \verb+RFConn+, as in the example in section~\ref{sss:floater}.
+A yield curve is defined by the \verb+YieldCurve+ command. The resulting object
+is added to a risk factor connector. Notice that different risk factors can be contained
+in a risk factor connector object. 
+
+% \clearpage
+
+\section{Contract events}
+The effect of a financial contract in the future is simulated by means of the 
+\verb+events+ function. The result is an \verb+EventSeries+ object. In akddition to
+some meta information its main content is the time series of contract events,
+the most elementary object of the future action of a financial contract.
+Examples are shown above. You see that for a fixed bond, the contract events are
+all cash flows but for the floating bond there are additional events related to 
+the rate reset. This already indicates that there are different types of events.
+In the list, the event type is contained in the \verb+CType+ column. Notice that 
+also cash flows can be of different type. The initial cash flow is always or type 
+\verb+IED+ (for initial exchange date) and the final cash flow is always of type
+\verb+MD+ for maturity date. Also capital payments and interest payments are of 
+different type. This is important for the correct computation of the downstream
+analysis.
 
 There is a function called \verb+getEventParameters()+ that returns a list of
-event types with the associated short names long names and indications of
+event types with the associated short names, long names and indications of
 how the events are drawn in the plot function.
 
-\begin{table}
+\begin{table}[t]
 \caption{List of event typew}
 \begin{tabular}{lllcc}
 Abbreviation & description & color & linetype & linewidth
@@ -676,68 +805,226 @@ NominalValue & NominalValue:     & red       & 2 & 2.0
 \end{tabular}
 \end{table}
 
-\clearpage
+% \clearpage
 
 \section{Aggregation}
 
-\section{Analytics}
-
-\clearpage
+The simulation of a large portfolio of contracts would generate myriads of 
+cash flow events together with other types of auxiliary events. Without further
+processing, the information these raw results contain is not understandable by humans.
+To make it understandable, it must be processed further. And this processing mainly
+consists of aggregation: Aggregation in time and aggregation across contracts. 
+These aggregation operation are weighted sums. And different types of events may
+have been to be selected for different types of analyses.
 
 \section{The Structure of an institution}
 
-An institution is modeled as a hierarchical tree. To this respect we use the
-\verb+data.tree+ package that makes available the possibility to create
-models that consist of a hierarchy of nodes (class \verb+Node+). A large variety
-of attributes. an be attached to each node and there are functions for carrying out recursive
-computations on the node and aggregation across the tree.
+Up to now we have introduced single contracts and portfolio of contracts. But this
+is not enough to model the structure of an institution such of a bank. Let's
+consider a small bank with several thousand contracts on its book. These contracts
+are grouped together by certain properties. The big divisions are the active side 
+and the passive side of the book. On the active side we have subdivisions as 
+short term and long term contracts or fixed rate and variable rate. On the passive
+side we have debt and equity, and debt is further divided into, .e.g., mortgages,
+loans to companies, etc.; and also according to the term and whether fixed or 
+variable rate. So we need a possibility to create such structures.
+
+The divisions just sketched can be organized on a hierarchical tree. Therefore,
+we model an institution as such a tree. Fortunately, this is supported by R by 
+the \verb+data.tree+ package. A tree consists of a hierarchiy of 
+that makes available the possibility to create nodes (class \verb+Node+). 
+A large variety of attributes can be attached to each node, 
+and there are functions for carrying out recursive
+computations on the nodes and aggregation across the tree.
 In general, a node has one parent and an arbitrary number of children. The uppermost
 node (top node or origin of the tree) has no parent. Nodes without children are
 called "`leaf nodes"'.
 
 Contracts are contained in the leaf nodes of the model. Technically, this is done
-by means of a list of the Ids of the contracts assciated with a given leaf node.
-Each contract is associated only to one node.
+by means of a list of the Ids of the contracts. This is list attached to the 
+corresponding leaf node.
+Each contract is associated to one and only one leaf node.
 
-Let's take the example of a simple power plant. To be specific, power is generated
-from gas, so it's a gas power plant. A model of the financial structure of this
-plant may look as follows:
-\begin{verbatim}
-         levelName
-1 PowerPlant
-2  ¦--Assets
-3  ¦   °--LongTerm
-4  ¦--Liabilities
-5  ¦   ¦--Debt
-6  ¦   °--Equity
-7  °--Operations
-8      ¦--Revenues
-9      °--Expenses
-\end{verbatim}
-The origin is labeld PowerPlant. It has three children nodes, namely \verb+Assets+,
+% Let's take the example of a simple power plant. To be specific, power is generated
+% from gas, so it's a gas power plant. A model of the financial structure of this
+% plant may look as follows:
+% \begin{verbatim}
+%          levelName
+% 1 PowerPlant
+% 2  ¦--Assets
+% 3  ¦   °--LongTerm
+% 4  ¦--Liabilities
+% 5  ¦   ¦--Debt
+% 6  ¦   °--Equity
+% 7  °--Operations
+% 8      ¦--Revenues
+% 9      °--Expenses
+% \end{verbatim}
+% The origin is labeled PowerPlant. It has three children nodes, namely \verb+Assets+,
+% \verb+Liabilities+ and \verb+Operations+. The first two parts are the usual sections
+% of a balance sheet. The first section contains financial and technical assets,
+% the second all types of debt as well as equity. In addition, we must model the revenues
+% and expenses that arise when operating the plant. This is done in the section
+% third node labeled \verb+Operations+. All these nodes have children nodes, and the
+% children nodes may have other children nodes. But with this structure we can
+% already model a simple plant. Here, \verb+LongTerm+, \verb+Debt+, \verb+Equity+,
+% \verb+Revenues+, and \verb+Expenses+ are the leave accounts.
+
+Let's consider the example of a very simple bank that on the asset side has just
+a current account as short term asset and mortgages as long term assets. 
+Its debt just consists of term deposits.
+
+We create the template of the institution model by the function \verb+institution+:
+<<>>=
+Bank <- institution("Simple Bank")
+Bank
+@
+The result is a quite general template that not only contains an asset and liability
+part as required by the balance sheet but also an operations part needed to model
+operational costs. The origin (the topmost node) is labeled \verb+Bank+. 
+It has three children nodes, namely \verb+Assets+,
 \verb+Liabilities+ and \verb+Operations+. The first two parts are the usual sections
 of a balance sheet. The first section contains financial and technical assets,
 the second all types of debt as well as equity. In addition, we must model the revenues
-and expenses that arise when operating the plant. This is done in the section
+and expenses that arise when operating e.g. a production factility. This is done in the section
 third node labeled \verb+Operations+. All these nodes have children nodes, and the
 children nodes may have other children nodes. But with this structure we can
-already model a simple plant. Here, \verb+LongTerm+, \verb+Debt+, \verb+Equity+,
-\verb+Revenues+, and \verb+Expenses+ are the leave accounts.
+already model simple institutions. 
+
+For banks, operational costs can be neglected in first order
+approximation because most cash flows are generated by the financial contracts in 
+the balance sheet. For industrial corporate, however, the operations part contains
+the main cash flows.
+
+In our simple bank model we also don't need short term assets other than the current 
+account. So we want to remove the unnecessary acccounts, which can be done by the
+node-related method \verb+<node>$RemoveChild(<child name>)+:
+<<results='hide'>>=
+Bank$RemoveChild("Operations")      
+Bank$Assets$RemoveChild("ShortTerm") 
+@
+<<echo=FALSE>>=
+Bank 
+@
+In a similar way, the node \verb+FixedAssets+ can be added to the node \verb+Assets+, 
+e.g., by the method
+<<>>=
+Bank$Assets$AddChild("FixedAssets")
+Bank
+@
+We remove it again because in the following we don't need it:
+<<results='hide'>>=
+Bank$Assets$RemoveChild("FixedAssets") 
+@
 
 In order to get a sensible model, this structure needs contents. The contents is
-contained in the contracts that are attached to the leaf nodes. In this simple case
-we just have single contracts in the nodes \verb+LongTerm+, \verb+Debt+, \verb+Revenues+,
-and \verb+Expenses+. The \verb+Equity+ node plays a special role because the
-value of equity is defined as the difference of the total value of the firms assets
-minus the total value of its debt.
+contained in the contracts that are attached to the leaf nodes. 
+% In this simple case
+% we just have single contracts in the nodes \verb+LongTerm+, \verb+Debt+, \verb+Revenues+,
+% and \verb+Expenses+. The \verb+Equity+ node plays a special role because the
+% value of equity is defined as the difference of the total value of the firms assets
+% minus the total value of its debt.
+% 
+We want more than just two 
+contracts as in the portfolio example above. So we stochastically generate 
+10 mortages and 10 term deposits by means of the following script:
+<<>>=
+ir <- 0.03         # market interest rate
+ir.spread <- 0.01  # interest rate spread (for mortgages)
+# generate stochastic volume
+nom.assets <- floor(rnorm(10,1000,20))
+nom.liab <- floor(rnorm(10,1000,20))
 
-\newpage
+mortgages <- list()
+termdeposits <- list()
+for (i in 1:10) {
+mat <- paste0(i, "years")
+mortgages[[i]] <- bond(ContractID = paste0("m",i),
+  start = "2020-04-01", maturity = mat, nominal = nom.assets[i],
+  coupon = ir+ir.spread, role="long") # notice the spread
+termdeposits[[i]] <- bond(ContractID = paste0("td",i),
+  start = "2020-04-01", maturity = mat, nominal = nom.liab[i],
+  coupon = ir, role="short")
+}
+@
+The contracts in these lists can be nicely displayed by converting them into
+\verb+Portfolio+ objects:
+<<>>=
+Portfolio(mortgages)
+Portfolio(termdeposits)
+@
+Notice that the interest the bank receives for mortgages is one percentage point higher
+than the interest it must pay for the term deposits. This is the classical business 
+model of a bank, but the spread of 1 percentage point is quite low.
+
+Now we add the contracts to the leaf nodes, namely the nodes \verb+Debt+ and
+\verb+LongTerm+. This is done by the \verb+addContracts+ 
+method:
+<<>>=
+addContracts(termdeposits, FindNode(Bank, "Debt"))
+addContracts(mortgages, FindNode(Bank, "LongTerm"))
+@
+Notice that the whole path to a node must be entered. In order to make it shorter,
+we use the \verb+"FindNode+ method, which returns the whole path to a node:
+<<>>=
+FindNode(Bank, "LongTerm")
+@
+
+Now, we can simulate this bank by means of the \verb+events+ method. We start 
+the simulation at \verb+t0 = "2020-01-01"+ (our analysis date) and simulated ten
+years into the future. Before doing so we must create
+a market environment with an appropriate yield curve. The following script contains
+all the required commands:
+<<>>=
+t0 <- "2020-01-01" 
+yc <- YieldCurve(label = "YC.CHF", 
+                 ReferenceDate = "2019-12-31", 
+                 Tenors = c("1W", "20Y"), Rates = c(0.03, 0.03))
+rf <- RFConn(yc)
+events(Bank, t0, rf, end_date = "2030-12-31")
+@
+
+% \newpage
+
+\section{The time bucket system}
+
+Now we have the raw results in form of all the contract events produced by all the
+contracts. These results are stored in the \verb+Bank+ object under the respective
+leaf nodes. In order to transform them into meaningful information, we must aggregate
+them in different ways. Before doing so we must define a so-called time bucket 
+system, which is a system of time intervals that divide the time line. The time
+buckets are needed for temporal aggregation.
+
+In order to define a time bucket system we first define a sequence of dates:
+<<echo=1>>=
+by <- timeSequence(t0, by = "1 year", length.out=11)
+by
+@
+Then, we turn this into a system of successive time intervals, the time buckets:
+<<echo=-4>>=
+years <- as.character(2020:2029)
+tb <- timeBuckets (by, bucketLabs = years, 
+                   breakLabs=paste0("1.1.",20:30))
+tb
+@
+Transforming a sequence of dates into a \verb+timeBuckets+ object is mainly a matter
+of convenience. The point here is the time intervals have intervals and break points.
+When we compute flows, we do it per interval. So we should label intervals.
+When we compute state variables, we do it as to a specific date, so that we need
+dates as label. The \verb+timeBuckets+ object accommodates for both, as you can
+see in the example. Date labels are specified for the break points and period
+labels (here years) are specified for the intervals.
+
 
 \section{Analytics}
+Now, we are ready for carrying out the analytics. This can be done 
+at the level of the individual contracts, of a portfolio or the level of a whole 
+institution. Here, we only show the analytics at the level of the whole institution.
+The syntax of portfolio objects or individual contracs is the same.
+The aggregation is performed first over time intervals if required; then across 
+contracts at the level of each leaf node; and finally across the nodes of the tree. 
 
-Analytics is carried out at the level of the individual contracts and then
-first aggregated across contracts at the level of each leaf node and then
-across the nodes of the tree. There are three standard types of analytics:
+There are three standard types of analytics:
 \begin{itemize}
   \item
   liquidity
@@ -746,126 +1033,148 @@ across the nodes of the tree. There are three standard types of analytics:
   \item
   value
 \end{itemize}
-
-
 Liquidity just aggregates all incoming and outgoing cash flows of the defined time
 periods. Income aggregates those cash flows that are relevant for income, plus
-certain non-cashflow events. Value aggregates the value of all contracts.
+certain non-cashflow events. Value aggregates the value of all contracts as to a specific date.
 
-Let's illustrate this for the example of the powerplant. The following report
-shows the yearly liquidity of the powerplant from the years 2018 till 2022.
-\begin{verbatim}
-                      2018   2019   2020   2021   2022
-1 PowerPlant         42.19  46.68  63.37  80.06  96.74
-2  ¦--Assets       -100.00   0.00   0.00   0.00   0.00
-3  ¦   °--LongTerm -100.00   0.00   0.00   0.00   0.00
-4  ¦--Liabilities   100.00 -12.00 -11.80 -11.60 -11.40
-5  ¦   ¦--Debt      100.00 -12.00 -11.80 -11.60 -11.40
-6  ¦   °--Equity      0.00   0.00   0.00   0.00   0.00
-7  °--Operations     42.19  58.68  75.17  91.66 108.14
-8      ¦--Revenues  129.67 145.44 161.21 176.98 192.74
-9      °--Expenses  -87.48 -86.76 -86.04 -85.32 -84.60
-\end{verbatim}
-The
-numbers are million EUR. The \verb+LongTerm+ node contains the technical asset
-that represents the plant. The outflow of 100mio EUR in 2018 is the initial investment.
-Thereafter, there is no further outflow. The numbers in the parent node \verb+Assets+
-are the same because this node has only a single child.
-The money for the investment has been
-borrowed. This is modeled by a loan in the \verb+Debt+ node. The loan has an
-initial value of also 100mio EUR with a linear amortisation over 10 years, i.e.,
-10mio EUR/year. The interest rate is 2\%. Corespondingly, there is an initial
-inflow in 2018 of 100mio EUR. The outflow in 2019 is 10mio EUR for amortisation
-plus 2mio EUR in interest. The next year, interest has only to be paid on the
-remaining 90mio EUR so that the outgoing cashflow is reduced to 11.8mio EUR. And
-so on. The numbers in the parent node \verb+Liabilities+ are the same even though
-this node has two children. The reason is that the node \verb+Equity+
-does not produce cash flows. The nodes \verb+Revenues+ and \verb+Expenses+ contain
-the operational revenues and expenses, according to their names. The node \verb+Operations+
-is thus the some of the corresponding values of its two children nodes.
+The first two are flow quantities which require aggregation over time intervals.
+The last is a state quantity. Here the case is more complicated. When evaluating
+nominal value, we don't aggregate over time. However, when evalutation market value
+(i.e., net present value) we must some over the whole series of discounted cash flows.
+Notice that this is a weighted temporal aggregation but not an aggregation over 
+specific time intervals defined in the time bucket system.
 
-Instead of computing the cashflows per period, we can also aggregate them over
-the years. This results in the following table:
-\begin{verbatim}
-                      2018    2019    2020   2021    2022
-1 PowerPlant         42.19   88.87  152.24  232.3  329.04
-2  ¦--Assets       -100.00 -100.00 -100.00 -100.0 -100.00
-3  ¦   °--LongTerm -100.00 -100.00 -100.00 -100.0 -100.00
-4  ¦--Liabilities   100.00   88.00   76.20   64.6   53.20
-5  ¦   ¦--Debt      100.00   88.00   76.20   64.6   53.20
-6  ¦   °--Equity      0.00    0.00    0.00    0.0    0.00
-7  °--Operations     42.19  100.87  176.04  267.7  375.84
-8      ¦--Revenues  129.67  275.11  436.32  613.3  806.04
-9      °--Expenses  -87.48 -174.24 -260.28 -345.6 -430.20
-\end{verbatim}
+Now let's illustrate this for our model bank. With all the preparatory steps 
+carrying out the analytics is pretty simple and, in the simplest case, just requires 
+three lines of commands:
+<<echo=1>>=
+val <- value(Bank, tb, type = "nominal")
+val[,-1]
+@
+<<>>=
+liquidity(Bank, by = tb, type = "marginal", digits = 0)
+@
+<<>>=
+income(Bank, by = tb, type = "marginal", revaluation.gains = FALSE, digits = 0)
+@
 
-Let's now have a look at the balance sheet, which contains the value (positive on
-the asset side and negative on the liability side) of the firms positions.
-It looks like this:
-\clearpage
-\begin{verbatim}
-                   18-01-02 19-01-02 20-01-02 21-01-02 22-01-02 23-01-02
-1 PowerPlant              0        0        0        0        0        0
-2  ¦--Assets              0      100       90       80       70       60
-3  ¦   °--LongTerm        0      100       90       80       70       60
-4  °--Liabilities         0     -100      -90      -80      -70      -60
-5      ¦--Debt            0     -100      -90      -80      -70      -60
-6      °--Equity          0        0        0        0        0        0
-\end{verbatim}
-Here, \verb+Operations+ is missing because no intrinsic value is attributed to operational
-revenues and expenses. The value is generated by the difference of the revenue
-cashflow and the expense cashflow shown in the liquidity report. In a real firm
-this difference is kept in a cash account until further use is made of it. Here
-we have not allowed for such a cash account.
-Thus, we just have initial 100mio EUR for the investment and initial -100 EUR for
-the loan. The investment is written of by 10mio EUR per year which reduces its
-book value accordingly. The model is constructed in such a way that the reduction
-of the plants book value is exactly equal to the amortisation of the loan. Therefore
-both value cancel exactly so that equity is zero.
+% \clearpage
+% Let's illustrate this for the example of the powerplant. The following report
+% shows the yearly liquidity of the powerplant from the years 2018 till 2022.
+% \begin{verbatim}
+%                       2018   2019   2020   2021   2022
+% 1 PowerPlant         42.19  46.68  63.37  80.06  96.74
+% 2  ¦--Assets       -100.00   0.00   0.00   0.00   0.00
+% 3  ¦   °--LongTerm -100.00   0.00   0.00   0.00   0.00
+% 4  ¦--Liabilities   100.00 -12.00 -11.80 -11.60 -11.40
+% 5  ¦   ¦--Debt      100.00 -12.00 -11.80 -11.60 -11.40
+% 6  ¦   °--Equity      0.00   0.00   0.00   0.00   0.00
+% 7  °--Operations     42.19  58.68  75.17  91.66 108.14
+% 8      ¦--Revenues  129.67 145.44 161.21 176.98 192.74
+% 9      °--Expenses  -87.48 -86.76 -86.04 -85.32 -84.60
+% \end{verbatim}
+% The
+% numbers are million EUR. The \verb+LongTerm+ node contains the technical asset
+% that represents the plant. The outflow of 100mio EUR in 2018 is the initial investment.
+% Thereafter, there is no further outflow. The numbers in the parent node \verb+Assets+
+% are the same because this node has only a single child.
+% The money for the investment has been
+% borrowed. This is modeled by a loan in the \verb+Debt+ node. The loan has an
+% initial value of also 100mio EUR with a linear amortisation over 10 years, i.e.,
+% 10mio EUR/year. The interest rate is 2\%. Corespondingly, there is an initial
+% inflow in 2018 of 100mio EUR. The outflow in 2019 is 10mio EUR for amortisation
+% plus 2mio EUR in interest. The next year, interest has only to be paid on the
+% remaining 90mio EUR so that the outgoing cashflow is reduced to 11.8mio EUR. And
+% so on. The numbers in the parent node \verb+Liabilities+ are the same even though
+% this node has two children. The reason is that the node \verb+Equity+
+% does not produce cash flows. The nodes \verb+Revenues+ and \verb+Expenses+ contain
+% the operational revenues and expenses, according to their names. The node \verb+Operations+
+% is thus the some of the corresponding values of its two children nodes.
+% 
+% Instead of computing the cashflows per period, we can also aggregate them over
+% the years. This results in the following table:
+% \begin{verbatim}
+%                       2018    2019    2020   2021    2022
+% 1 PowerPlant         42.19   88.87  152.24  232.3  329.04
+% 2  ¦--Assets       -100.00 -100.00 -100.00 -100.0 -100.00
+% 3  ¦   °--LongTerm -100.00 -100.00 -100.00 -100.0 -100.00
+% 4  ¦--Liabilities   100.00   88.00   76.20   64.6   53.20
+% 5  ¦   ¦--Debt      100.00   88.00   76.20   64.6   53.20
+% 6  ¦   °--Equity      0.00    0.00    0.00    0.0    0.00
+% 7  °--Operations     42.19  100.87  176.04  267.7  375.84
+% 8      ¦--Revenues  129.67  275.11  436.32  613.3  806.04
+% 9      °--Expenses  -87.48 -174.24 -260.28 -345.6 -430.20
+% \end{verbatim}
+% 
+% Let's now have a look at the balance sheet, which contains the value (positive on
+% the asset side and negative on the liability side) of the firms positions.
+% It looks like this:
+% \begin{verbatim}
+%                    18-01-02 19-01-02 20-01-02 21-01-02 22-01-02 23-01-02
+% 1 PowerPlant              0        0        0        0        0        0
+% 2  ¦--Assets              0      100       90       80       70       60
+% 3  ¦   °--LongTerm        0      100       90       80       70       60
+% 4  °--Liabilities         0     -100      -90      -80      -70      -60
+% 5      ¦--Debt            0     -100      -90      -80      -70      -60
+% 6      °--Equity          0        0        0        0        0        0
+% \end{verbatim}
+% Here, \verb+Operations+ is missing because no intrinsic value is attributed to operational
+% revenues and expenses. The value is generated by the difference of the revenue
+% cashflow and the expense cashflow shown in the liquidity report. In a real firm
+% this difference is kept in a cash account until further use is made of it. Here
+% we have not allowed for such a cash account.
+% Thus, we just have initial 100mio EUR for the investment and initial -100 EUR for
+% the loan. The investment is written of by 10mio EUR per year which reduces its
+% book value accordingly. The model is constructed in such a way that the reduction
+% of the plants book value is exactly equal to the amortisation of the loan. Therefore
+% both value cancel exactly so that equity is zero.
+% 
+% It is clear that this is not realistic. From the liquidity report we see that
+% for 2018 there is an excess liquidity of 42.19mio EUR, which is the profit
+% of the plant. This should be reported in the balance sheet as of end of 2018
+% (here Jan 2, 2019). However, this sum is lost. The total sum that gets lost
+% over the 5 years of the simulation can be seen by looking at the cumulated
+% liquidity. It amounts to nearly 330mio EUR.
+% 
+% \subsection{The cash collector}
+% 
+% The aggregated liquidity per period must somehow be carried over to the next
+% period in order not to get lost during the simulation of the institution into
+% the future. This is done at the level of the entire institution. Since the quantity
+% to be carried over is the aggregated liquidity at the level of the institution,
+% its computation can directly be used. This could be done, e.g., by adding a
+% special leaf node (to be called, e.g., \verb+Cash+). The values of the cumulated
+% liquidity at the level of the institution can directly be copied into this account.
+% Notice, that no real cash flows are associated with this operation. It is a pur
+% booking exercise.
+% 
+% However, there is an additional component that must be taken into account. This
+% is the interest paid to this money. Thus, for every period, interest must be
+% added to the value of this account for the corresponding period.
+% If we integrate this into the model, we get the following balance sheet:
+% \begin{verbatim}
+%                     18-01-02 19-01-02 20-01-02 21-01-02 22-01-02 23-01-02
+% 1 PowerPlant               0     0.00     0.00     0.00     0.00     0.00
+% 2  ¦--Assets               0   143.03   181.51   237.97   312.78   406.31
+% 3  ¦   ¦--Cash             0    43.03    91.51   157.97   242.78   346.31
+% 4  ¦   °--LongTerm         0   100.00    90.00    80.00    70.00    60.00
+% 5  °--Liabilities          0  -143.03  -181.51  -237.97  -312.78  -406.31
+% 6      ¦--Debt             0  -100.00   -90.00   -80.00   -70.00   -60.00
+% 7      °--Equity           0   -43.03   -91.51  -157.97  -242.78  -346.31
+% \end{verbatim}
+% Here, we have an additional node \verb+Cash+ that contains the cumulated liquidity
+% plus the interest earned with this money. The interest rate to be used should
+% be rates typically paid to a current account, i.e., short term rates.
+% 
 
-It is clear that this is not realistic. From the liquidity report we see that
-for 2018 there is an excess liquidity of 42.19mio EUR, which is the profit
-of the plant. This should be reported in the balance sheet as of end of 2018
-(here Jan 2, 2019). However, this sum is lost. The total sum that gets lost
-over the 5 years of the simulation can be seen by looking at the cumulated
-liquidity. It amounts to nearly 330mio EUR.
-
-\subsection{The cash collector}
-
-The aggregated liquidity per period must somehow be carried over to the next
-period in order not to get lost during the simulation of the institution into
-the future. This is done at the level of the entire institution. Since the quantity
-to be carried over is the aggregated liquidity at the level of the institution,
-its computation can directly be used. This could be done, e.g., by adding a
-special leaf node (to be called, e.g., \verb+Cash+). The values of the cumulated
-liquidity at the level of the institution can directly be copied into this account.
-Notice, that no real cash flows are associated with this operation. It is a pur
-booking exercise.
-
-However, there is an additional component that must be taken into account. This
-is the interest paid to this money. Thus, for every period, interest must be
-added to the value of this account for the corresponding period.
-If we integrate this into the model, we get the following balance sheet:
-\begin{verbatim}
-                    18-01-02 19-01-02 20-01-02 21-01-02 22-01-02 23-01-02
-1 PowerPlant               0     0.00     0.00     0.00     0.00     0.00
-2  ¦--Assets               0   143.03   181.51   237.97   312.78   406.31
-3  ¦   ¦--Cash             0    43.03    91.51   157.97   242.78   346.31
-4  ¦   °--LongTerm         0   100.00    90.00    80.00    70.00    60.00
-5  °--Liabilities          0  -143.03  -181.51  -237.97  -312.78  -406.31
-6      ¦--Debt             0  -100.00   -90.00   -80.00   -70.00   -60.00
-7      °--Equity           0   -43.03   -91.51  -157.97  -242.78  -346.31
-\end{verbatim}
-Here, we have an additional node \verb+Cash+ that contains the cumulated liquidity
-plus the interest earned with this money. The interest rate to be used should
-be rates typically paid to a current account, i.e., short term rates.
-
-
-\clearpage
+% \clearpage
 
 \section{Demos with graphical user interface}
 
-\newpage
+to be done
+
+% \newpage
+
 
 
 % \begingroup
