@@ -1167,6 +1167,35 @@ income(Bank, by = tb, type = "marginal", revaluation.gains = FALSE, digits = 0)
 % be rates typically paid to a current account, i.e., short term rates.
 % 
 
+\section{Graphical representation of the analysis}
+
+Here is an example of a graphical representation of the result, in this case
+for the time evolution of value:
+<<>>=
+library(ggplot2)
+data <- data.frame(
+  Date=colnames(val)[-1],
+  Type=rep("Assets",10),
+  Value=as.numeric(val[2,-1])
+)
+
+data <- rbind(data,
+              data.frame(
+                Date=colnames(val)[-1],
+                Type=rep("Debt",10),
+                Value=as.numeric(val[6,-1])
+              ))
+@
+
+<<eval=FALSE>>=
+ggplot(data, aes(fill=Type, y=Value, x=Date), col=colors) + 
+  geom_bar(position="stack", stat="identity")
+@
+<<echo=FALSE,out.extra = 'height=12cm,width=15cm'>>=
+ggplot(data, aes(fill=Type, y=Value, x=Date), col=colors) + 
+  geom_bar(position="stack", stat="identity")
+@
+
 % \clearpage
 
 \section{Demos with graphical user interface}
