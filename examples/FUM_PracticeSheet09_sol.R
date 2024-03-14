@@ -11,14 +11,14 @@
 library(FEMS)
 options(warn=-1)
 options(width=60)  #  width of console
-
-
+# assign("actusURL", "xxx", pos=2)
+FEMS:::actusURL
 ## -------------------------------------------------------------------------------------------------------------------------------
 # Analysis date:
 t0 <- "2016-01-02"
 # Create portfolio and import cntracts
 ptf <- Portfolio()
-ptf.tbl <- read.csv("./R/BankBilanzPositionen.csv", 
+ptf.tbl <- read.csv("./data/BankBilanzPositionen.csv", 
                     header = TRUE)
 import(ptf,source = ptf.tbl)
 # Extract attributes for further usage
@@ -120,7 +120,7 @@ mc.simulation <- function(bank, t0, end_date, rf, scenarios, by)
 
 ## -------------------------------------------------------------------------------------------------------------------------------
 # load yield curve scenarios
-mc.scenarios = read.table("./R/ZinsSzenarien.csv", sep=";", header=TRUE)
+mc.scenarios = read.table("./data/ZinsSzenarien.csv", sep=";", header=TRUE)
 head(mc.scenarios)
 # Drop columns with meta information
 mc.scenarios = mc.scenarios[,-c(1,2)]
@@ -130,7 +130,7 @@ results <- mc.simulation(Bank, t0, end_date = "2025-12-31",
                            rf, scenarios=mc.scenarios[1:n,], tb)
 
 
-load(file="./R/StaticBankMC_Results.RData")
+load(file="./data/StaticBankMC_Results.RData")
 results <- resultate
 length(results)
 names(results[[1]])

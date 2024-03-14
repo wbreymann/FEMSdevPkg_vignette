@@ -1,0 +1,29 @@
+% \documentclass{article}
+\documentclass[hyperref,compress,handout]{beamer}
+\begin{document}
+
+
+\begin{frame}[fragile]
+\frametitle{}
+
+Dies ist ein Test
+<<>>=
+x <- 2
+@
+
+
+\end{frame}
+
+%------------------------------------------------------------------------------
+
+\begin{frame}[fragile]
+\frametitle{}
+
+
+<<echo=FALSE,out.extra='height=6.5cm,width=7cm'>>=
+plot(1:10,1:10)
+@
+
+\end{frame}
+
+\end{document}

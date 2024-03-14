@@ -36,6 +36,8 @@ vignettes/*.run.xml
 vignettes/*.synctex.gz
 vignettes/*.tex
 vignettes/*.toc
+vignettes/figure/unnamed-chunk-*.pdf
+
 
 # examples subdirectory
 examples/*.html
