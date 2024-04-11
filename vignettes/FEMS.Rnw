@@ -596,9 +596,9 @@ Now we are all set to start creating contracts.
 
 \section{Contracts}
 
-\subsection{Single Contracts}
+\subsection{Single financial contracts}
 
-\subsubsection{Fixed Rate Contracts}
+\subsubsection{Fixed rate contracts}
 
 Let's start with a simple bond (called \verb+PAM+ or \verb+Principal at Maturity+ 
 in ACTUS language). To define a bond, we need to know at least its start date, 
@@ -646,7 +646,7 @@ plot(bond1, t0)
 plot(bond1, t0)
 @
 
-\subsubsection{Variable Rate Contracts}
+\subsubsection{Variable rate contracts}
 \label{sss:floater}
 Contracts can also have variable interest rates. Herefore, we need to initialize 
 some interest rate risk factors first. This is done with the command \verb+YieldCurve+.
@@ -710,6 +710,96 @@ plot(evs, t0)
 <<echo=FALSE,out.extra = 'height=12cm,width=15cm'>>=
 plot(evs, t0)
 @
+
+\subsection{Functional contract}
+
+
+Their is a second group of contracts that are not financial contracts and not
+defined as ACTUS Standard Contract Types. We call them functional contracts.
+They are defined at the R level and model additional contract events that are needed
+for a complete modeling of an institution or firm. Here, we have two types of
+contracts in mind: 
+\begin{description}
+  \item[Investment contracts]
+  These contracts model investments into physical assets. They typical will give 
+  rise to a large initial cash flow needed for buying the asset and then a series
+  depreciation events. Notice that the depreciation events are not associated with 
+  cash flows but are required to correctly compute book income.
+  \item[Operational cash flow contracts]
+  These cash flows arrive from the operational business of the firm. They are not
+  related to a financial contract but are needed to model the expenses and revenues
+  that arise from the firm's business except financial contracts. Essentially, they
+  consist of only a cash flow pattern that is modeled externally and then passed
+  to the contract.
+\end{description}
+The framework of both contracts is similar: The depreciation pattern or the pattern
+of operational cash flows is modeled externally as time series and then passed 
+to the contract. The contract then computes the contract events from this time series.
+
+The syntax of both contracts is the same:
+<<eval=FALSE>>=
+Investments(ContractID, Currency, pattern, args)
+OperationalCF(ContractID, Currency, pattern=rent.fun, args)
+@
+Here,
+\begin{description}
+  \item[ContractID]
+  is the unique identifier of the contract
+  \item[Currency]
+  is the currency of the contract
+  \item[pattern]
+  is a user-defined function that generates the contract events 
+  \item[args]
+  is a list of arguments that is passed to the function \verb+pattern+.
+\end{description}
+\verb+pattern+ returns an object of class \verb+timeSeries+ that describes the
+respective contract events. They are of event type \verb+DPR+ in the case of the 
+\verb+Investment+ contract and of of event type \verb+OPS+ for operational cash 
+flows in the case of an \verb+OperationalCF+ contract.
+
+Here an example of an operational cash flow contract with random payments with 
+mean 1000 and standard deviation 100:
+<<>>=
+tstart <- "2024-01-01"
+t0 <- "2023-12-31"
+CFSeries <- rnorm(10, 1000, 100)             # Series of cash flows
+CFDates <- timeSequence(from = timeDate(tstart), # series of dates
+                        by = "1 years", length.out = 10)
+#
+cf.function <- function(events, times) {   # cash flow generating function
+  timeSeries(data=events, charvec=times)
+}
+cf.function(CFSeries, CFDates)               # test of function
+op.cf <- OperationalCF(ContractID="op1", Currency="CHF",  # Define contract
+                      pattern=cf.function, 
+                      args=list(events=CFSeries, times=CFDates) )
+# evs <- events(op.cf, "2020-12-31")                  # Starting 1 day before t0
+evs <- events(op.cf, t0)                  # Starting 1 day before t0
+print(evs)
+@
+A series of 10 cash flows of type \verb+OPS+ is generated. The dates of the cash flows
+correspond to the dates in the time series \verb+CFDates+. 
+
+The \verb+Investment+ contract is defined in a similar way. Here, we assume that
+we have an initial investment of 1000000 at \verb+t0+ and a linear depreciation 
+over ten years.
+<<>>=
+initial <- 1000000
+rate <- 0.1
+depSeries <- sequence(11, initial, 0, by = -rate*initial)
+depDates <- timeSequence(from = timeDate(tstart), by = "1 years", length.out = 11)
+dep.function <- function(events, times) {     # depreciation generating function
+  timeSeries(data=events, charvec=times)
+}
+inv <- Investments(ContractID="inv1", Currency="CHF", pattern=dep.function, 
+                   args=list(events=depSeries, times=depDates))
+evs <- events(inv, t0)
+print(evs)
+@
+Here, at \verb+IED+ a cash outflow of the value of the investment occurs. The
+first depreciation event of type \verb+DPR+ occurs at the end of the first year,
+followed by nine more depreciation events of the same size. Notice that 
+\verb+NominalValue+ accordingly decreases from 1000000 to 0.
 
 \subsection{Portfolios of contracts}
 
@@ -1167,18 +1257,139 @@ income(Bank, by = tb, type = "marginal", revaluation.gains = FALSE, digits = 0)
 % be rates typically paid to a current account, i.e., short term rates.
 % 
 
+\section{Credit risk}
+
+Credit risk or default risk is the risk that a counterparty cannot fulfill its 
+obligations. In this case the credit defaults. This results of the contractual 
+cash flow being interrupted. 
+
+Credit default occurs with a certain probability (usually per year) called 
+probability of default (short $PD$). If a default event occurs, 
+in the worst case the loan or bond holder will not receive
+any further cash flow. Typically, however, he or she will still receive a certain 
+payment but only a fraction of the outstanding value. This fraction is cause
+the recovery rate ($RR$.) The recovery rate is usually expressed as a percentage
+of the outstanding value. The share actually lost in an default event is called
+Loss Given Default ($LGD$). It's given as $1-RR$.
+
+Let's consider an example. Assume that as of Jan 1st, 2024, 
+a bank has a fixed-rate mortgage portfolio of 200 mortgages
+with a nominal value of CHF 500'000 each with an interest rate of 5\% 
+and a time to maturity of 3 years. 
+In the absence of defaults, the evolution of value, liquidity and income over the
+next 2 years are as follows:\\[3ex]
+\begin{tabular}{|p{4cm}|l|l|l|l|}
+Period & 2024-01-01 & 2025-01-01 & 2026-01-01 & 2027-01-01 \\\hline
+Value \newline 
+[in Mio CHF] & 100 & 100 & 100 & 0 \\\hline
+Liquidity \newline
+(for the previous year) & 5 & 5 & 5 & 105 \\\hline
+Income \newline
+(for the previous year) & 5 & 5 & 5 & 5 \\\\
+\end{tabular}
+
+Now, let's assume that the probability of default is 1\% per year without recovery.
+This means that 1 Mio or two mortgages will default each year, namely at the 
+end of 2024 and at the end of 2025. For simplicity we
+assume that the default happens at the end of the year right after the interest 
+payment. The value and the
+forthcoming interest payments of the defaulted mortgages get lost.
+Then the time evolution of value, liquidity and income will look as follows:\\[3ex]
+\begin{tabular}{|p{4cm}|l|l|l|l|}
+Period & 2024-01-01 & 2025-01-01 & 2026-01-01 & 2027-01-01 \\\hline
+Value \newline 
+[in Mio CHF] & 100 & 99 & 98 & 0 \\\hline
+Liquidity \newline
+(for the previous year) & 5 & 5 & 4.95 & 101.90 \\\hline
+Income \newline
+(for the previous year) & 5 & 4 & 3.95 & 3.9 \\\\
+\end{tabular}
+
+The value of the portfolio is reduced by 1 Mio CHF each year. At Jan 1st, 2026,
+however, the non-defaulted outstanding value is payed back, which is why the value
+at this date is 0. In the liquidity statement, the loss of the 1 Mio because of 
+the default only shows up in the reduced interest payment. The loss  of the
+capital only shows up at maturity, when the outstanding capital is paid back.
+
+Now let's assume that the recovery rate is 50\%. This means that the bank will 
+recover have of the capital lost. Again for simplicity we assume that this will
+take place immediately. However, this will not change the table above because 
+the capital recovered is not longer part of the mortgage portfolio. Instead,
+the associated cash flows of 0.5 Mio/year are collected in the current account. 
+
+From the above it is clear that we have two random variables, namely the probability 
+of default $PD$ and the recovery rate $RR$. In this simple model, these 
+are risk factors related to default. Notice that this is a portfolio view on default
+and not a single contract view. Because a single contract is either performing
+or in default: it's essential a 0-1 variable.\footnote{%
+Notice that in reality the situation is somewhat more complicated.}
+In order to evaluate the effect on a portfolio, we need to simulate a sufficiently
+large number of contract. In this sense, the portfolio model is a probabilistic 
+shortcut.
+
+The single contract default can be modeled in detail. 
+Unfortunately, however, there is no possibility to directly communicate 
+the risk factors of a portfolio default model to the ACTUS financial contracts. 
+Therefore, we need a workaround.
+
+In order to construct this workaround, we need to determine how the disrupted 
+event sequence differs from the contractual event sequence in the case of a default 
+event. Essentially, this is the difference of the numbers in the two tables above
+plus the additional cash flows in the current account because of recovery. This 
+looks as follows:
+\\[3ex]
+\begin{tabular}{|p{4cm}|l|l|l|l|}
+Period & 2024-01-01 & 2025-01-01 & 2026-01-01 & 2027-01-01 \\\hline
+Value \newline 
+[in Mio CHF] & 0 & -1 & -1 & 0 \\\hline
+Liquidity \newline
+(for the previous year) & 5 & 5 & -0.05 & -3.1 \\\hline
+Income \newline
+(for the previous year) & 5 & -1 & -1.05 & -1.1 \\\\
+\end{tabular}
+
+And on the current account with have the additional liquidity \\[3ex]
+\begin{tabular}{|p{4cm}|l|l|l|l|}
+Period & 2024-01-01 & 2025-01-01 & 2026-01-01 & 2027-01-01 \\\hline
+Liquidity \newline
+(for the previous year) & 0 & 0.5 & 0.5 & 0.5 \\\\
+\end{tabular}
+
+This means that for eauch year where a default occurs we must create a contract
+that accounts for these differences. This can be done by defining a short position
+with that nominal of the defaulted value that starts at the date of the default.
+All other contract terms remain the same, with the expect of one called 
+\verb+"PremiumDiscountAtIED"+. This variable reduces the cash flow at \verb+IED+
+accordingly. It takes into account the fact that when generating a short position
+for the defaulted value, the bank will receive not the full cash associated with
+the contracts nominal value but only the reduced share $RR$, which is zero if 
+there is no recovery. For the default at the end of 2024, for the contract we 
+define, the following terms must be different:\\[3ex]
+\begin{tabular}{l|p{7cm}}
+Contract Term & Value \\\hline
+\verb+nominal+ & $PD \cdot \text{nominal}$ \\
+\verb+role+ & short \\
+\verb+PremiumDiscountAtIED+ & $ -PD (1-RR) \cdot \text{nominal}$ \\
+time to maturity & to be adjusted such that the contract ends at the same time as the original contract
+\end{tabular}
+ 
+
+\section{Monte Carlo simulation}
+
 \section{Graphical representation of the analysis}
 
-Here is an example of a graphical representation of the result, in this case
-for the time evolution of value:
+Here is an example of a graphical representation of the result, in this case a
+comparison of the time evolution of assets and debt. This example uses the \verb+ggplot2+
+library. Notice that it explicitly accesses the rows for assets and debt of the 
+\verb+val+ dataframe:
 <<>>=
 library(ggplot2)
+# preparation of data to be plotted
 data <- data.frame(
   Date=colnames(val)[-1],
   Type=rep("Assets",10),
   Value=as.numeric(val[2,-1])
 )
-
 data <- rbind(data,
               data.frame(
                 Date=colnames(val)[-1],
@@ -1186,17 +1397,25 @@ data <- rbind(data,
                 Value=as.numeric(val[6,-1])
               ))
 @
-
+And here the plot command:
 <<eval=FALSE>>=
 ggplot(data, aes(fill=Type, y=Value, x=Date), col=colors) + 
   geom_bar(position="stack", stat="identity")
 @
+\begin{figure}
 <<echo=FALSE,out.extra = 'height=12cm,width=15cm'>>=
 ggplot(data, aes(fill=Type, y=Value, x=Date), col=colors) + 
   geom_bar(position="stack", stat="identity")
 @
+\caption{Time evolution of assets and debt.}
+\label{fig:value-barplot}
+\end{figure}
 
+The result is displayed in fig.~\ref{fig:value-barplot}.
+Similar graphics can be prepared for any type of results.
 % \clearpage
+
+\clearpage
 
 \section{Demos with graphical user interface}
 
